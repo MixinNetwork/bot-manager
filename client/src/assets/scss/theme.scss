@@ -1,0 +1,56 @@
+@import '../font/index.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Nunito, sans-serif;
+  overflow: hidden;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+ul,
+ol,
+li {
+  list-style: none;
+}
+
+input,
+textarea {
+  border: 0;
+  outline: none;
+}
+
+img {
+  border: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+button {
+  border: 0;
+  background-color: transparent;
+  outline: none;
+  cursor: pointer;
+
+  &:hover {
+    opacity: .9;
+  }
+}
+
+i {
+  font-style: normal;
+}
