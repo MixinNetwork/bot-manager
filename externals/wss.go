@@ -19,8 +19,14 @@ type listener struct {
 	ackMessage []*bot.ReceiptAcknowledgementRequest
 }
 
-func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId string) error {
+var ignoreCategory = map[string]bool{
+	"SYSTEM_CONVERSATION": true,
+}
 
+func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId string) error {
+	if ignoreCategory[msg.Category] {
+		return nil
+	}
 	data, _ := base64.StdEncoding.DecodeString(msg.Data)
 
 	models.AddMessage(models.Message{
