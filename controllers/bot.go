@@ -55,6 +55,14 @@ func (c *BotController) Add() {
 		models.AddOrUpdateUserBotItem(userId, bot.ClientId, bot.SessionId, bot.PrivateKey)
 		models.AddOrUpdateBotItem(bot.ClientId, bot.SessionId, bot.PrivateKey, user.FullName, user.IdentityNumber, user.AvatarURL)
 	}
+
+	connectBot(models.UserBot{
+		ClientId:   bot.ClientId,
+		SessionId:  bot.SessionId,
+		PrivateKey: bot.PrivateKey,
+		Hash:       models.Sha256Hash(bot.ClientId, bot.SessionId, bot.PrivateKey),
+	})
+
 	c.Data["json"] = Resp{Data: models.BotInfoRes{
 		ClientId:       bot.ClientId,
 		FullName:       user.FullName,
