@@ -86,11 +86,14 @@ func (u *UserController) Login() {
 func AddMessageUser(userId string) (*models.UserBase, error) {
 	var hasUser models.User
 	db.Conn.First(&hasUser, "user_id=?", userId)
+	log.Println("hasUser.IdentityNumber", hasUser.IdentityNumber)
 	if hasUser.IdentityNumber == "" {
 		userInfo, err := externals.GetUserById(userId)
 		if err != nil {
+			log.Println("获取userInfo出错了", err)
 			return nil, err
 		}
+		log.Println("userInfo", userInfo.IdentityNumber)
 		hasUser = models.User{
 			UserId:         userInfo.UserId,
 			FullName:       userInfo.FullName,
