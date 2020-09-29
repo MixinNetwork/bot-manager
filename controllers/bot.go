@@ -23,7 +23,6 @@ type addBotReq struct {
 
 func (c *BotController) Add() {
 	if err := recover(); err != nil {
-		log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>", err)
 		err := session.BadRequestError()
 		session.HandleError(c.Ctx, err)
 	}
@@ -39,14 +38,14 @@ func (c *BotController) Add() {
 	bot.PrivateKey = externals.HandlePrivateKey(bot.PrivateKey)
 	token, err := botApi.SignAuthenticationToken(bot.ClientId, bot.SessionId, bot.PrivateKey, "GET", "/me", "")
 	if err != nil {
-		log.Println(err)
+		log.Println("/controllers/bot.Add SignAuthenticationToken error", err)
 		err := session.BadRequestError()
 		session.HandleError(c.Ctx, err)
 		return
 	}
 	user, err := botApi.UserMe(durable.Ctx, token)
 	if err != nil {
-		log.Println(err)
+		log.Println("/controllers/bot.Add UserMe error", err)
 		err := session.BadRequestError()
 		session.HandleError(c.Ctx, err)
 		return
@@ -56,7 +55,7 @@ func (c *BotController) Add() {
 		models.AddOrUpdateBotItem(bot.ClientId, bot.SessionId, bot.PrivateKey, user.FullName, user.IdentityNumber, user.AvatarURL)
 	}
 
-	connectBot(models.UserBot{
+	go connectBot(models.UserBot{
 		ClientId:   bot.ClientId,
 		SessionId:  bot.SessionId,
 		PrivateKey: bot.PrivateKey,

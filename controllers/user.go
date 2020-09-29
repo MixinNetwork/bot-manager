@@ -27,11 +27,11 @@ func (u *UserController) Post() {
 	var user externals.User
 	err := json.Unmarshal(u.Ctx.Input.RequestBody, &user)
 	if err != nil {
-		log.Println(err)
+		log.Println("/controllers/user.Post Unmarshal", err)
 	}
 	botUser, err := externals.GetUserById(user.UserId)
 	if err != nil {
-		log.Println(err)
+		log.Println("/controllers/user.Post GetUserById", err)
 	}
 	u.Data["json"] = botUser
 	//models.AddUser()
@@ -47,9 +47,7 @@ type LoginRespData struct {
 }
 
 func (u *UserController) Login() {
-	log.Println(1232)
 	code := u.GetString("code")
-	log.Println(code)
 	user, token, err := externals.GetUserByCode(code)
 
 	if err != nil || user == nil || token == "" {
@@ -86,14 +84,12 @@ func (u *UserController) Login() {
 func AddMessageUser(userId string) (*models.UserBase, error) {
 	var hasUser models.User
 	db.Conn.First(&hasUser, "user_id=?", userId)
-	log.Println("hasUser.IdentityNumber", hasUser.IdentityNumber)
 	if hasUser.IdentityNumber == "" {
 		userInfo, err := externals.GetUserById(userId)
 		if err != nil {
 			log.Println("获取userInfo出错了", err)
 			return nil, err
 		}
-		log.Println("userInfo", userInfo.IdentityNumber)
 		hasUser = models.User{
 			UserId:         userInfo.UserId,
 			FullName:       userInfo.FullName,

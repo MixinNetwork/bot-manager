@@ -25,14 +25,12 @@ func init() {
 				errMessage := session.AuthorizationError()
 				resp, err := json.Marshal(errMessage)
 				if err != nil {
-					log.Println(err)
+					log.Println("ListenAndServe", err)
 				}
 				w.Write(resp)
 				return
 			}
 			userId, err := middleware.Parse(r.URL.RawQuery[6:])
-			log.Println(userId)
-
 			if err != nil || userId == "" {
 				// handle error
 				return
@@ -71,7 +69,7 @@ func init() {
 					}
 					if string(msg) == "ping" {
 						if err := writeMessage(conn, []byte("pong")); err != nil {
-							log.Println(err)
+							log.Println("/controllers/wss writeMessage", err)
 						}
 					} else {
 						err := handleUserMessage(conn, msg, userId)
@@ -90,7 +88,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 	err := json.Unmarshal(msg, &message)
 	log.Printf("%#v\n", message)
 	if err != nil {
-		log.Println(err)
+		log.Println("/controllers/wss handleUserMessage", err)
 	}
 	if message.CreatedAt != "" {
 		// 发送了 初始化的消息
@@ -203,7 +201,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		// 1. 发送给其他管理员
 		originMessage := models.GetLastMessageByRecipientId(clientId, msg.UserId)
 		if originMessage == nil || originMessage.OriginMessageId == "" {
-			log.Println("forwardDashboardMessage 获取originMessage失败", msg.UserId)
+			log.Println("/controllers/wss forwardDashboardMessage msg.AdminId!='' 获取originMessage失败", msg.UserId)
 			return
 		}
 		messages := models.GetForwardMessagesByOrigin(clientId, originMessage.OriginMessageId)
@@ -227,7 +225,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		if len(sendMessages) > 0 {
 			err := bot.PostMessages(durable.Ctx, sendMessages, clientId, sessionId, privateKey)
 			if err != nil {
-				log.Println("forwardDashboardMessage, 发送给其他管理员", err)
+				log.Println("/controllers/wss forwardDashboardMessage, 发送给其他管理员", err)
 			}
 		}
 	} else if isAdmin {
@@ -235,7 +233,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		// 1.
 		originMessage := models.GetOriginMessageById(clientId, msg.QuoteMessageId)
 		if originMessage == nil || originMessage.RecipientId == "" {
-			log.Println("forwardDashboardMessage 获取originMessage失败", msg.MessageId)
+			log.Println("/controllers/wss forwardDashboardMessage 获取originMessage失败", msg.MessageId)
 			return
 		} else {
 			userId = originMessage.RecipientId
@@ -244,8 +242,8 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 	}
 
 	userInfo, err := AddMessageUser(msg.UserId)
-	if err != nil {
-		log.Println(err)
+	if err != nil || userInfo == nil {
+		log.Println("/controllers/wss forwardDashboardMessage AddMessageUser", err)
 	}
 
 	// 发送给后台的管理员

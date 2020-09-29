@@ -5,7 +5,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"log"
 )
 
 var Conn *gorm.DB
@@ -19,9 +18,7 @@ func Connect() (err error) {
 	db, err := gorm.Open("postgres", dbConnString)
 	Conn = db
 	if err != nil {
-		log.Println("数据库连接失败")
 		return err
 	}
-	log.Println("数据库连接成功")
 	return nil
 }
