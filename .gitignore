@@ -3,3 +3,6 @@ vendor
 .DS_Store
 *.iml
 *.xml
+ssl
+bot-manager
+dist
