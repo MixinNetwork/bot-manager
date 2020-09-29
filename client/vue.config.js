@@ -1,7 +1,7 @@
 module.exports = {
   productionSourceMap: false,
   devServer: {
-    port: 8082
+    port: 8080
   },
   transpileDependencies: [
     'vue-echarts',
