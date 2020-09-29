@@ -224,7 +224,6 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 			})
 		}
 		status = "pending"
-		log.Println("转发管理员的长度！！！", sendMessages[0].QuoteMessageId)
 		if len(sendMessages) > 0 {
 			err := bot.PostMessages(durable.Ctx, sendMessages, clientId, sessionId, privateKey)
 			if err != nil {
