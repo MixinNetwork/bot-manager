@@ -1,11 +1,12 @@
 package externals
 
 import (
+	"strings"
+
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/astaxie/beego"
 	"github.com/liuzemei/bot-manager/durable"
 	"github.com/liuzemei/bot-manager/session"
-	"strings"
 )
 
 var (
@@ -30,6 +31,7 @@ func init() {
 	clientSecret = beego.AppConfig.String("clientSecret")
 	sessionId = beego.AppConfig.String("sessionId")
 	privateKey = beego.AppConfig.String("privateKey")
+	privateKey = HandlePrivateKey(privateKey)
 }
 
 func GetUserByCode(code string) (*bot.User, string, *session.Error) {
