@@ -130,6 +130,12 @@ func GetUserBotByUserId(userId string) []BotInfoRes {
 	return respBots
 }
 
+func CheckUserHasBot(userId, clientId string) bool {
+	var bot UserBot
+	db.Conn.Find(&bot, "user_id=? AND client_id=?", userId, clientId)
+	return bot.ClientId == ""
+}
+
 func DeleteUserBotItem(userId, clientId string) {
 	db.Conn.Delete(UserBot{}, "user_id=? AND client_id=?", userId, clientId)
 }

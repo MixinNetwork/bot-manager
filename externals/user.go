@@ -1,6 +1,10 @@
 package externals
 
 import (
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"strings"
 
 	"github.com/MixinNetwork/bot-api-go-client"
@@ -62,6 +66,35 @@ func GetUserById(userId string) (*User, error) {
 	user.FullName = _user.FullName
 	user.IdentityNumber = _user.IdentityNumber
 	return &user, nil
+}
+
+func UploadFile(body io.Reader, size int64) (*bot.Attachment, error) {
+	attachment, err := bot.CreateAttachment(durable.Ctx, clientId, sessionId, privateKey)
+	if err != nil {
+		log.Println("externals uploadFile CreateAttachment", err)
+		return nil, err
+	}
+	uploadToAMZ(attachment.UploadUrl, body, size)
+
+	return attachment, nil
+}
+func uploadToAMZ(url string, body io.Reader, size int64) {
+	req, err := http.NewRequest("PUT", url, body)
+	if err != nil {
+		log.Println("uploadToAMZ err", err)
+	}
+	req.Header.Add("x-amz-acl", "public-read")
+	req.Header.Add("Content-Type", "application/octet-stream")
+	req.ContentLength = size
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		log.Println("执行失败了 err", err)
+		return
+	}
+	defer response.Body.Close()
+	resp, err := ioutil.ReadAll(response.Body)
+	log.Println(string(resp))
 }
 
 func HandlePrivateKey(privateKey string) string {

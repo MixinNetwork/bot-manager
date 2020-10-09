@@ -21,8 +21,8 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/user",
-			beego.NSRouter("/", &controllers.UserController{}, "POST:Post"),
-			beego.NSRouter("login", &controllers.UserController{}, "GET:Login"),
+			beego.NSRouter("/", &controllers.UserController{}, "GET:Get;POST:Post;PUT:Put"),
+			beego.NSRouter("/login", &controllers.UserController{}, "GET:Login"),
 			beego.NSInclude(
 				&controllers.UserController{},
 			),
@@ -37,6 +37,13 @@ func init() {
 			beego.NSRouter("/", &controllers.BotController{}, "POST:Add;GET:Get"),
 			beego.NSInclude(
 				&controllers.BotController{},
+			),
+		),
+		beego.NSNamespace("/message",
+			beego.NSRouter("/uploadFile", &controllers.MessageController{}, "POST:UploadFile"),
+			beego.NSRouter("/replay", &controllers.MessageController{}, "GET:GetMessageReplay;POST:AddMessageReplay;DELETE:DeleteMessageReplay"),
+			beego.NSInclude(
+				&controllers.MessageController{},
 			),
 		),
 	)

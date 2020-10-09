@@ -27,8 +27,10 @@ func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId str
 	if ignoreCategory[msg.Category] {
 		return nil
 	}
+	if !models.CheckUserStatus(l.ClientId, msg.UserId) {
+		return nil
+	}
 	data, _ := base64.StdEncoding.DecodeString(msg.Data)
-
 	models.AddMessage(models.Message{
 		ClientId:       l.ClientId,
 		ConversationId: msg.ConversationId,
@@ -63,9 +65,12 @@ func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 		if err != nil {
 			if err.Error() == "websocket: bad handshake" {
 				log.Println("StartWebSockets Err", err)
+			} else if err.Error() == `{"status":500,"code":7000,"description":"Blaze server error."}` {
+				log.Println("Blaze server error")
+			} else if strings.Contains(err.Error(), "operation timed out") {
+				log.Println("Blaze timed out")
 			} else {
-				log.Println("密码不对？", err)
-				return err
+				log.Println("密码不对？", err.Error())
 			}
 		}
 	}

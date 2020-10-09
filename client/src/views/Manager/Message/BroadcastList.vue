@@ -19,7 +19,7 @@
         <button>撤回</button>
       </div>
     </li>
-    <BroadcastModal/>
+    <BroadcastModal />
   </ul>
 </template>
 
@@ -40,7 +40,6 @@
     finished: "已发布"
   }
   export default {
-
     components: { BroadcastModal },
     computed: {
       ...mapState(['broadcastList'])
@@ -59,6 +58,7 @@
 
 
 <style lang="scss" scoped>
+
   .item {
     display: flex;
     align-items: center;
@@ -139,6 +139,20 @@
 
   }
 
+  .action-button {
+    position: absolute;
+    top: -20px;
+    right: 0;
+    width: 116px;
+    line-height: 30px;
+    background-color: #5B73A0;
+    color: #ffffff;
+    border-radius: 20px;
+    font-size: 16px;
+    text-align: center;
+    z-index: 10;
+
+  }
 
   @media screen and (max-width: $adaptWidth) {
 

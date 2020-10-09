@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/liuzemei/bot-manager/db"
+	"github.com/liuzemei/bot-manager/utils"
 )
 
 type DailyData struct {
@@ -48,6 +49,10 @@ func AddDailyData(clientId string, users int, messages int) {
 	db.Conn.Create(&dailyData)
 }
 
+type count = struct {
+	Count int `gorm:"column:count"`
+}
+
 func GetDailyData(clientID string) RespGetData {
 	var dailyList []DailyData
 	var resp RespGetData
@@ -59,5 +64,12 @@ func GetDailyData(clientID string) RespGetData {
 			Messages: data.Messages,
 		})
 	}
+	var messageCount count
+	db.Conn.Debug().Raw("SELECT count(1) FROM messages WHERE client_id=? AND created_at - CURRENT_DATE > interval ' 0 day'", clientID).Scan(&messageCount)
+	var userCount count
+	db.Conn.Raw("SELECT count(1) FROM bot_users WHERE client_id=? AND created_at - CURRENT_DATE > interval ' 0 day'", clientID).Scan(&userCount)
+	resp.Today.Messages = messageCount.Count
+	resp.Today.Users = userCount.Count
+	resp.Today.Date = utils.GetDate(0)
 	return resp
 }

@@ -10,8 +10,8 @@ type DataController struct {
 }
 
 func (c *DataController) Get() {
-	userId := c.Ctx.Input.GetData("UserId")
-	resp := models.GetDailyData(userId.(string))
+	clientId := c.Ctx.Input.Query("client_id")
+	resp := models.GetDailyData(clientId)
 	c.Data["json"] = Resp{Data: resp}
 	c.ServeJSON()
 }

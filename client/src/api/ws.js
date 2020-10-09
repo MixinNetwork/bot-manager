@@ -53,18 +53,10 @@ class WSSClient {
   }
 
   async _on_message({ data }) {
-    console.log(data)
     if (data === 'pong') return this.isAlive = true
     data = JSON.parse(data)
     await this.handleMessage(data)
   }
-
-  // async _on_message(data) {
-  //   console.log(data)
-  //   // if (data === 'pong') return this.isAlive = true
-  //   // data = JSON.parse(data)
-  //   // await this.handleMessage(data)
-  // }
 
   _on_error(e) {
     console.log(e)

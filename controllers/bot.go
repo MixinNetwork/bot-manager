@@ -23,31 +23,27 @@ type addBotReq struct {
 
 func (c *BotController) Add() {
 	if err := recover(); err != nil {
-		err := session.BadRequestError()
-		session.HandleError(c.Ctx, err)
+		session.HandleBadRequestError(c.Ctx)
 	}
 	userId := c.Ctx.Input.GetData("UserId").(string)
 	body := c.Ctx.Input.RequestBody
 
 	var bot addBotReq
 	if err := json.Unmarshal(body, &bot); err != nil {
-		err := session.BadRequestError()
-		session.HandleError(c.Ctx, err)
+		session.HandleBadRequestError(c.Ctx)
 		return
 	}
 	bot.PrivateKey = externals.HandlePrivateKey(bot.PrivateKey)
 	token, err := botApi.SignAuthenticationToken(bot.ClientId, bot.SessionId, bot.PrivateKey, "GET", "/me", "")
 	if err != nil {
 		log.Println("/controllers/bot.Add SignAuthenticationToken error", err)
-		err := session.BadRequestError()
-		session.HandleError(c.Ctx, err)
+		session.HandleBadRequestError(c.Ctx)
 		return
 	}
 	user, err := botApi.UserMe(durable.Ctx, token)
 	if err != nil {
 		log.Println("/controllers/bot.Add UserMe error", err)
-		err := session.BadRequestError()
-		session.HandleError(c.Ctx, err)
+		session.HandleBadRequestError(c.Ctx)
 		return
 	}
 	if user.UserId != "" {

@@ -49,10 +49,9 @@
     },
     methods: {
       getOptions,
-      ...mapActions('data', ["initState", "toggleAsset"])
+      ...mapActions('data', ["toggleAsset"])
     },
     mounted() {
-      this.initState()
     }
   }
 

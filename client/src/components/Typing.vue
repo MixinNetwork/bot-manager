@@ -7,15 +7,15 @@
         class="group-list"
         @click="clickChangeGroup(key)"
       >
-        <i class="iconfont" v-if="key === activeBroadcastType">&#xe637;</i>
+        <i class="iconfont" v-if="key === activeType">&#xe637;</i>
         <i class="iconfont" v-else>&#xe638;</i>
         <b>{{value}}</b>
       </span>
     </div>
     <div class="edit-main">
-      <textarea class="send-text" v-if="activeBroadcastType==='PLAIN_TEXT'" placeholder="在此输入公告内容" v-model="content"></textarea>
-      <div class="send-image" v-if="activeBroadcastType==='PLAIN_IMAGE'">
-        <input type="file" @change="getFile"/>
+      <textarea class="send-text" v-if="activeType==='PLAIN_TEXT'" placeholder="在此输入公告内容" v-model="content"></textarea>
+      <div class="send-image" v-if="activeType==='PLAIN_IMAGE'">
+        <input type="file" @change="getFile" />
         <span>点击选择图片</span>
       </div>
     </div>
@@ -26,17 +26,21 @@
   import { mapState, mapActions } from 'vuex'
 
   export default {
-    data() {
-      return {
-        content: '',
+    computed: {
+      ...mapState('message', ['broadcastModalType', 'broadcastModal', 'activeType', 'messageTypeMap']),
+      content: {
+        get() {
+          return this.$store.state.message.activeContent
+        },
+        set(activeContent) {
+          console.log(activeContent)
+          this.$DC('message', { activeContent })
+        }
       }
     },
-    computed: {
-      ...mapState('message', ['broadcastModalType', 'broadcastModal', 'activeBroadcastType', 'messageTypeMap'])
-    },
     methods: {
-      clickChangeGroup(activeBroadcastType) {
-        this.$DC('message', { activeBroadcastType })
+      clickChangeGroup(activeType) {
+        this.$DC('message', { activeType })
       },
       getFile(e) {
         console.log(e.target.files[0])

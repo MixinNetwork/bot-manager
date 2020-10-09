@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/liuzemei/bot-manager/db"
 	"github.com/liuzemei/bot-manager/utils"
+	"log"
+	"time"
 )
 
 type User struct {
@@ -28,8 +30,11 @@ type UserBaseResp struct {
 }
 
 type BotUser struct {
-	ClientId string `gorm:"column:client_id"`
-	UserId   string `gorm:"column:user_id"`
+	ClientId  string `gorm:"column:client_id"`
+	UserId    string `gorm:"column:user_id"`
+	Status    string `gorm:"column:status"`
+	BlockTime string `gorm:"column:block_time"`
+	CreatedAt string `gorm:"column:created_at"`
 }
 
 func init() {
@@ -44,18 +49,23 @@ func init() {
   created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );`)
 	db.RegisterMigration(`CREATE TABLE IF NOT EXISTS bot_users (
-  user_id             VARCHAR(36) NOT NULL,
-  client_id           VARCHAR(36) NOT NULL,
-  created_at          TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-	PRIMARY KEY(user_id, client_id)
+  user_id      VARCHAR(36) NOT NULL,
+  client_id    VARCHAR(36) NOT NULL,
+  status			 VARCHAR DEFAULT '',
+  block_time   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  PRIMARY KEY(user_id, client_id)
 );`)
+
+	log.Println(time.Now())
+	log.Println(utils.FormatTime(time.Now()))
+
 }
 
 func AddUser(u *User) {
 	var _u User
 	var updateStr string
 	db.Conn.First(&_u, "user_id=?", u.UserId)
-
 	if _u.UserId != "" {
 		if u.AccessToken != "" {
 			updateStr = fmt.Sprintf(
@@ -72,25 +82,121 @@ func AddUser(u *User) {
 	}
 }
 
-
 func AddBotUser(u *User, clientId string) {
-	AddUser(u)
 	var botUser = BotUser{
-		ClientId: clientId,
-		UserId:   u.UserId,
+		ClientId:  clientId,
+		UserId:    u.UserId,
+		BlockTime: utils.FormatTime(time.Now()),
+		CreatedAt: utils.FormatTime(time.Now()),
 	}
 	db.Conn.Set("gorm:insert_option", "ON CONFLICT DO NOTHING").Create(&botUser)
 }
 
-func DeleteBotUser(userID, clientId string) {
-	db.Conn.Delete(BotUser{}, "user_id=? AND client_id=?", userID, clientId)
+func UpdateBotUserStatus(clientId, userId, status string) {
+	if status == "normal" {
+		status = ""
+		db.Conn.Table("bot_users").Where("client_id=? AND user_id=?", clientId, userId).Update("status", status)
+	} else {
+		db.Conn.Table("bot_users").Where("client_id=? AND user_id=?", clientId, userId).Update(map[string]interface{}{"status": status, "block_time": time.Now()})
+	}
 }
+
+func CheckUserStatus(clientId, userId string) bool {
+	var botUser BotUser
+	db.Conn.First(&botUser, "client_id=? AND user_id=?", clientId, userId)
+	return botUser.UserId != "" && botUser.Status == ""
+}
+
+//func DeleteBotUser(userID, clientId string) {
+//	db.Conn.Delete(BotUser{}, "user_id=? AND client_id=?", userID, clientId)
+//}
 
 func GetTodayUserCount(clientId string) (count int) {
 	t := utils.GetDate(0)
 	db.Conn.Debug().Table("bot_users").Where("to_char(created_at, 'YYYY-MM-DD')=? AND client_id=?", t, clientId).Count(&count)
 	return
 }
+
+func GetUserById(userId string) UserBaseResp {
+	var userInfo User
+	db.Conn.First(&userInfo, "user_id=?", userId)
+	return UserBaseResp{
+		FullName:       userInfo.FullName,
+		IdentityNumber: userInfo.IdentityNumber,
+		AvatarURL:      userInfo.AvatarURL,
+	}
+}
+
+func GetBotUser(userId, clientId string) *UserBaseResp {
+	var botUser UserBase
+	db.Conn.Raw("select users.identity_number, users.avatar_url, users.full_name from bot_users left join users on bot_users.user_id=users.user_id where bot_users.user_id=? AND bot_users.client_id=?", userId, clientId).Scan(&botUser)
+	return &UserBaseResp{
+		FullName:       botUser.FullName,
+		IdentityNumber: botUser.IdentityNumber,
+		AvatarURL:      botUser.AvatarURL,
+	}
+}
+
+type BotUserType struct {
+	IdentityNumber string `gorm:"column:identity_number"`
+	AvatarURL      string `gorm:"column:avatar_url"`
+	FullName       string `gorm:"column:full_name"`
+	CreatedAt      string `gorm:"column:created_at"`
+	ClientId       string `gorm:"column:client_id"`
+	UserId         string `gorm:"column:user_id"`
+	Status         string `gorm:"column:status"`
+	BlockTime      string `gorm:"column:block_time"`
+}
+type BotUserTypeResp struct {
+	IdentityNumber string `json:"identity_number"`
+	AvatarURL      string `json:"avatar_url"`
+	FullName       string `json:"full_name"`
+	CreatedAt      string `json:"created_at"`
+	UserId         string `json:"user_id"`
+}
+type BotUserBlackTypeResp struct {
+	IdentityNumber string `json:"identity_number"`
+	AvatarURL      string `json:"avatar_url"`
+	FullName       string `json:"full_name"`
+	CreatedAt      string `json:"created_at"`
+	UserId         string `json:"user_id"`
+	BlockTime      string `json:"block_time"`
+}
+
+func GetUsersByClientId(clientId, status string) interface{} {
+	users := make([]*BotUserType, 0)
+	if status == "normal" {
+		status = ""
+	}
+	db.Conn.Raw("select users.user_id, users.identity_number, users.avatar_url, users.full_name, to_char(bot_users.created_at, 'YYYY/MM/DD HH24:MI:SS') as created_at, to_char(block_time, 'YYYY/MM/DD HH24:MI:SS') as block_time from bot_users left join users on bot_users.user_id=users.user_id where bot_users.client_id=? and bot_users.status=?", clientId, status).Scan(&users)
+	if status == "" {
+		userList := make([]*BotUserTypeResp, 0)
+		for _, user := range users {
+			userList = append(userList, &BotUserTypeResp{
+				IdentityNumber: user.IdentityNumber,
+				AvatarURL:      user.AvatarURL,
+				FullName:       user.FullName,
+				CreatedAt:      user.CreatedAt,
+				UserId:         user.UserId,
+			})
+		}
+		return userList
+	} else {
+		userList := make([]*BotUserBlackTypeResp, 0)
+		for _, user := range users {
+			userList = append(userList, &BotUserBlackTypeResp{
+				IdentityNumber: user.IdentityNumber,
+				AvatarURL:      user.AvatarURL,
+				FullName:       user.FullName,
+				CreatedAt:      user.CreatedAt,
+				UserId:         user.UserId,
+				BlockTime:      user.BlockTime,
+			})
+		}
+		return userList
+	}
+}
+
 //
 //func GetUserById(userID string) *UserBaseResp {
 //	var userInfo UserBaseResp

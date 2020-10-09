@@ -1,24 +1,15 @@
 <template>
-  <div class="growth">
-    <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState"/>
+  <div class="users">
+    <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState" />
     <ul class="main-container">
-      <template v-if="currentState==='normal'">
-        <li v-for="_ in 10" class="user-item">
-          <img src="https://mixin-images.zeromesh.net/OsaSpGZMBV4PmQ2Om-UnDZ-878Bk37heqprakp_Sll6MWM-ciLdUQrvEDIeSF4z3t0sgfXt8Hw4zmDkiR2irag0=s256">
-          <span class="user-name">Crossle</span>
-          <span class="user-number">Mixin ID: 26648</span>
-          <span class="user-time">加入时间：2020/02/01 12:01:11</span>
-          <button>操作</button>
-        </li>
-      </template>
-      <template v-else-if="currentState==='block'">
-        <li v-for="_ in 2" class="user-item">
-          <img src="https://mixin-images.zeromesh.net/OsaSpGZMBV4PmQ2Om-UnDZ-878Bk37heqprakp_Sll6MWM-ciLdUQrvEDIeSF4z3t0sgfXt8Hw4zmDkiR2irag0=s256">
-          <span class="user-name">Crossle</span>
-          <span class="user-number">Mixin ID: 26648</span>
-          <span class="user-time">加入时间：2020/02/01 12:01:11</span>
-          <span class="user-time">屏蔽时间：2020/02/01 14:01:11</span>
-          <button>恢复</button>
+      <template>
+        <li v-for="user in userList" class="user-item">
+          <img :src="user.avatar_url">
+          <span class="user-name">{{user.full_name}}</span>
+          <span class="user-number">Mixin ID: {{user.identity_number}}</span>
+          <span class="user-time">加入时间：{{user.created_at}}</span>
+          <span class="user-time" v-if="user.block_time">屏蔽时间：{{user.block_time}}</span>
+          <button @click="clickBlockUser(user)">{{user.block_time ? "恢复":"操作"}}</button>
         </li>
       </template>
     </ul>
@@ -33,26 +24,51 @@
     name: "User",
     components: { Tabs },
     computed: {
-      ...mapState('growth', ['stateList', 'currentState', 'growthList'])
+      ...mapState('users', ['stateList', 'currentState', 'userList'])
+    },
+    watch: {
+      currentState() {
+        this.updateUserList()
+      }
     },
     methods: {
-      ...mapActions('growth', ['toggleState']),
-      clickAction(activeGrower) {
-        this.$DC('growth', { activeGrower, actionState: true })
+      ...mapActions('users', ['toggleState', 'getUserList', 'updateUserStatus']),
+      updateUserList() {
+        this.getUserList(this.currentState)
       },
-      clickState(key) {
-        this.toggleState(key)
+      clickBlockUser(user) {
+        const { user_id, block_time } = user
+        const status = block_time ? "normal" : "block"
+        const currentStatus = block_time ? "block" : "normal"
+        const title = block_time ? "确认恢复？" : "确认拉黑？"
+        // if (user.block_time) {
+        //   this.$confirm("确认恢复？", async () => {
+        //     let req = await this.updateUserStatus({ user_id: user.user_id, status: "normal" })
+        //     if (req === "ok") {
+        //       this.$message("操作成功")
+        //       this.getUserList("block")
+        //     }
+        //   })
+        // } else {
+        this.$confirm(title, async () => {
+          let req = await this.updateUserStatus({ user_id, status })
+          if (req === "ok") {
+            this.$message("操作成功")
+            this.getUserList(currentStatus)
+          }
+        })
+        // }
       }
     },
     mounted() {
-      this.APIS.getGrowthUserList('pending')
+      this.updateUserList()
     }
   }
 </script>
 
 <style lang="scss" scoped>
 
-  .growth {
+  .users {
     display: flex;
     width: 100%;
     flex-direction: column;
@@ -125,7 +141,7 @@
   }
 
   @media screen and (max-width: $adaptWidth) {
-    .growth {
+    .users {
       padding: 8px 20px 0 20px;
       margin: 0;
     }

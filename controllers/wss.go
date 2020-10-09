@@ -7,6 +7,7 @@ import (
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/liuzemei/bot-manager/durable"
+	"github.com/liuzemei/bot-manager/externals"
 	"github.com/liuzemei/bot-manager/middleware"
 	"github.com/liuzemei/bot-manager/models"
 	"github.com/liuzemei/bot-manager/session"
@@ -16,6 +17,20 @@ import (
 	"net/http"
 	"strings"
 )
+
+func connectBot(botInfo models.UserBot) {
+	if models.HashMessengerMap[botInfo.Hash] != nil {
+		return
+	}
+	var messageTransfer = make(chan models.MessengerChannel)
+	models.HashMessengerMap[botInfo.Hash] = messageTransfer
+	models.HashManagerMap[botInfo.Hash] = make(map[string]chan models.RespMessage)
+	go readMessage(messageTransfer, botInfo.Hash)
+	err := externals.StartWebSockets(botInfo.ClientId, botInfo.SessionId, botInfo.PrivateKey, botInfo.Hash)
+	if err != nil {
+		delete(models.HashMessengerMap, botInfo.Hash)
+	}
+}
 
 func init() {
 	go func() {
@@ -86,7 +101,6 @@ func init() {
 func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 	var message models.RespMessage
 	err := json.Unmarshal(msg, &message)
-	log.Printf("%#v\n", message)
 	if err != nil {
 		log.Println("/controllers/wss handleUserMessage", err)
 	}
@@ -101,25 +115,44 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		}
 	} else {
 		// 发送了正常消息
-		botInfo := models.GetBotById(message.ClientId)
-		base64Data := base64.StdEncoding.EncodeToString([]byte(message.Data))
-		messagePre := &bot.MessageRequest{
-			ConversationId: bot.UniqueConversationId(message.ClientId, message.RecipientId),
-			RecipientId:    message.RecipientId,
-			MessageId:      bot.UuidNewV4().String(),
-			Category:       message.Category,
-			Data:           base64Data,
+		var msg []byte
+		var messagePre *bot.MessageRequest
+		if message.Category == "PLAIN_TEXT" {
+			base64Data := base64.StdEncoding.EncodeToString([]byte(message.Data.(string)))
+			messagePre = &bot.MessageRequest{
+				ConversationId: bot.UniqueConversationId(message.ClientId, message.RecipientId),
+				RecipientId:    message.RecipientId,
+				MessageId:      bot.UuidNewV4().String(),
+				Category:       message.Category,
+				Data:           base64Data,
+			}
+		} else if message.Category == "PLAIN_IMAGE" {
+			_msgData, err := json.Marshal(message.Data)
+			base64Data := base64.StdEncoding.EncodeToString(_msgData)
+			if err != nil {
+				return err
+			}
+			messagePre = &bot.MessageRequest{
+				ConversationId: bot.UniqueConversationId(message.ClientId, message.RecipientId),
+				RecipientId:    message.RecipientId,
+				MessageId:      bot.UuidNewV4().String(),
+				Category:       message.Category,
+				Data:           base64Data,
+			}
+		} else {
+			log.Println("不支持的消息格式")
+			return nil
 		}
-		msg, err := json.Marshal(messagePre)
+		msg, err = json.Marshal(messagePre)
 		if err != nil {
 			return err
 		}
+		botInfo := models.GetBotById(message.ClientId)
 		accessToken, err := bot.SignAuthenticationToken(botInfo.ClientId, botInfo.SessionId, botInfo.PrivateKey, "POST", "/messages", string(msg))
 		if err != nil {
 			return err
 		}
 		body, err := bot.Request(durable.Ctx, "POST", "/messages", msg, accessToken, bot.UuidNewV4().String())
-
 		if err != nil {
 			return err
 		}
@@ -195,7 +228,6 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		}
 		data = att.ViewURL
 	}
-
 	if msg.AdminId != "" {
 		// 来自 网页的消息
 		// 1. 发送给其他管理员
@@ -241,11 +273,10 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		status = "read"
 	}
 
-	userInfo, err := AddMessageUser(msg.UserId)
+	userInfo, err := GetMessageUserAutoUpdate(msg.UserId, clientId)
 	if err != nil || userInfo == nil {
-		log.Println("/controllers/wss forwardDashboardMessage AddMessageUser", err)
+		log.Println("/controllers/wss forwardDashboardMessage GetMessageUserAutoUpdate", err)
 	}
-
 	// 发送给后台的管理员
 	for _, chanel := range models.HashManagerMap[hash] {
 		if chanel != nil {
@@ -302,7 +333,6 @@ func changeWssConnect(hashChannel chan string, conn io.Writer, userId string) {
 		models.HashManagerMap[hash][userId] = messageTransfer
 		go wssReadMessage(messageTransfer, conn)
 	}
-
 }
 
 func writeMessage(conn io.Writer, message []byte) error {

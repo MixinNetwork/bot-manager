@@ -44,7 +44,6 @@ class DB {
       let bTime = new Date(b.created_at)
       return aTime - bTime
     })
-    console.log(data)
     if (data.length > 0) {
       return { created_at: data[data.length - 1].created_at }
     }
@@ -99,8 +98,6 @@ function resolveData(req, fn) {
   let state = false
   return new Promise((resolve, reject) => {
     req.onsuccess = () => {
-      console.log('成功')
-      console.log(req)
       state = true
       let { result } = req
       if (!result) return resolve([])
@@ -108,13 +105,11 @@ function resolveData(req, fn) {
       resolve(result)
     }
     req.onerror = e => {
-      console.log('失败')
       state = true
       reject(e)
     }
     setTimeout(() => {
       if (state) return
-      console.log('超时', req)
       resolve([])
     }, 5000)
   })

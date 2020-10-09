@@ -9,12 +9,22 @@ confirm.install = vue => {
   vue.prototype.$confirm = (optionOrTitle, onSuccess) => {
     if (typeof optionOrTitle === "string") {
       ins.title = optionOrTitle
-      ins.onSuccess = onSuccess
+      ins.onSuccess = async () => {
+        let t = await onSuccess()
+        if (t !== false) {
+          ins.visible = false
+        }
+      }
     } else if (typeof optionOrTitle === "object") {
       const { confirm, cancel, success } = optionOrTitle
       if (confirm) ins.confirm = confirm
       if (cancel) ins.cancel = cancel
-      if (success) ins.onSuccess = success
+      if (success) ins.onSuccess = async () => {
+        let t = await success()
+        if (t !== false) {
+          ins.visible = false
+        }
+      }
     }
     ins.visible = true
   }

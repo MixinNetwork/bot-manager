@@ -16,6 +16,8 @@ export default {
       add: "被加好友回复"
     },
     messageTypeMap: { PLAIN_TEXT: '文字消息', PLAIN_IMAGE: '图片', BUTTON_GROUP: "按钮" },
+    activeType: 'PLAIN_TEXT',
+    activeContent: '',
 
     // 消息相关
     replyModal: false,
@@ -51,19 +53,16 @@ export default {
       },
     ],
     activeBroadcast: {},
-    activeBroadcastType: 'PLAIN_TEXT',
 
     // 关键字回复相关
     keyModal: false,
     keyModalType: 'edit',
-    keyList: [
-      { key: "下载 更新", category: "PLAIN_TEXT", content: "http://mixin.one/messager", },
-      { key: "下载 更新", category: "PLAIN_IMAGE", content: "http://mixin.one/messager", },
-      { key: "下载 更新", category: "BUTTON_GROUP", content: "http://mixin.one/messager", },
-    ],
-    activeKey: {},
-    activeKeyType: "PLAIN_TEXT"
+    keyList: [],
+    activeKey: "",
+    activeReplayId: "",
 
+    helloData: "",
+    helloCategory: "",
     //
 
 
@@ -112,9 +111,6 @@ export default {
         recipient_id = ctx.state.activeContact.user_id,
         { data, category } = payload,
         client_id = ctx.rootState.user.active_bot.client_id
-      console.log(123)
-      console.log(client_id)
-      debugger
       wss.ws.send(JSON.stringify({ client_id, recipient_id, data, user_id, category }))
     },
     sendBroadcast(ctx, payload) {
@@ -130,6 +126,66 @@ export default {
       status = status || ctx.state.currentState
       ctx.commit('changeState', { currentState: status })
     },
+
+
+    // messageReplay
+    addOrUpdateMessageReplay(ctx) {
+      currentClientID = ctx.rootState.user.active_bot.client_id
+      const { activeType, activeContent, activeKey, activeReplayId } = ctx.state
+      return api.postMessageReplay({
+        replay_id: activeReplayId || "",
+        keys: activeKey.split(" "),
+        category: activeType,
+        data: activeContent,
+        client_id: currentClientID,
+      })
+    },
+    async getMessageReplayList(ctx) {
+      currentClientID = ctx.rootState.user.active_bot.client_id
+      const replayList = await api.getMessageReplay(currentClientID)
+      const keyList = []
+      replayList.forEach(item => {
+        if (["Hi", "你好"].includes(item.key)) {
+          return ctx.commit('changeState', {
+            helloData: item.data,
+            helloCategory: item.category,
+          })
+        }
+
+        const idx = keyList.findIndex(subItem => subItem.replay_id === item.replay_id)
+        if (idx === -1) {
+          keyList.push({
+            replay_id: item.replay_id,
+            key: item.key,
+            category: item.category,
+            content: item.data
+          })
+        } else {
+          keyList[idx].key += ` ${item.key}`
+        }
+      })
+      ctx.commit('changeState', { keyList })
+    },
+    deleteMessageReplay(ctx, replay_id) {
+      currentClientID = ctx.rootState.user.active_bot.client_id
+      return api.deleteMessageReplay(replay_id, currentClientID)
+    },
+    async clickAddReplay(ctx) {
+      let { helloData, helloCategory } = ctx.state
+      if (!helloCategory) {
+        await ctx.dispatch('getMessageReplayList')
+        let { helloData, helloCategory } = ctx.state
+        ctx.commit("changeState", {
+          activeType: helloCategory || "PLAIN_TEXT",
+          activeContent: helloData
+        })
+      } else {
+        ctx.commit("changeState", {
+          activeType: helloCategory || "PLAIN_TEXT",
+          activeContent: helloData
+        })
+      }
+    }
   }
 }
 
@@ -161,6 +217,9 @@ function findIndexOrObj(messageItem, target = []) {
     }
     return { idx, obj }
   } else {
+    full_name && (target[idx].full_name = full_name)
+    avatar_url && (target[idx].avatar_url = avatar_url)
+    identity_number && (target[idx].identity_number = identity_number)
     let obj = { message_id, category, data, created_at, status }
     return { idx, obj }
   }

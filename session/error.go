@@ -25,14 +25,14 @@ func HandleError(ctx *context.Context, err *Error) {
 	ctx.Output.JSON(err, false, false)
 }
 
-//func ParseError(err string) (Error, bool) {
-//	var sessionErr Error
-//	json.Unmarshal([]byte(err), &sessionErr)
-//	return sessionErr, sessionErr.Code > 0 && sessionErr.Description != ""
-//}
+func HandleBadRequestError(ctx *context.Context) {
+	description := "The request body can’t be parser as valid data."
+	err := createError(http.StatusAccepted, http.StatusBadRequest, description)
+	ctx.Output.JSON(err, false, false)
+}
 
 func BadRequestError() *Error {
-	description := "The request body can’t be pasred as valid data."
+	description := "The request body can’t be parser as valid data."
 	return createError(http.StatusAccepted, http.StatusBadRequest, description)
 }
 

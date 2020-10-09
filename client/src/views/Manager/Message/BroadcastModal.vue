@@ -4,7 +4,7 @@
       <template v-if="broadcastModalType==='send'">
         <h3>发布公告</h3>
         <i class="iconfont close-btn" @click="clickClose">&#xe636;</i>
-        <Typing/>
+        <Typing />
         <div class="btns">
           <button @click="clickConfirmBtn()" class="btn send">发布</button>
         </div>
@@ -54,7 +54,9 @@
     methods: {
       ...mapActions('message', ['sendBroadcast']),
       clickConfirmBtn() {
-        if (!this.content) return this.$message('内容不能为空')
+        this.$confirm("确认发布？", async () => {
+
+        })
       },
       // async clickBtn(state) {
       //   if (state === 'cancel') {

@@ -6,9 +6,13 @@ export default {
   state: () => ({
     token: '',
     user_info: {},
+
+    show_add_bot: false,
     bot_list: [],
     active_bot: {},
-    show_add_bot: false
+
+
+
   }),
   mutations: {
     changeState(state, obj) {
@@ -44,6 +48,7 @@ export default {
       if (state.active_bot.client_id === item.client_id) return
       commit('changeState', { active_bot: item })
       ctx.dispatch('message/toggleBotMessage', item, { root: true })
+      ctx.dispatch('data/toggleStatistics', item, { root: true })
     }
   }
 }

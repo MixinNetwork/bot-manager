@@ -2,7 +2,7 @@
   <Modal :show="replyModal">
     <div class="modal-container">
       <header>
-        <Avatar class="avatar" :user_info="activeContact" size="40"/>
+        <Avatar class="avatar" :user_info="activeContact" size="40" />
         <div class="user-info">
           <p>{{activeContact.full_name}}</p>
           <i>Mixin ID：{{activeContact.identity_number}}</i>
@@ -29,7 +29,7 @@
 
             <template v-else-if="item.category === 'PLAIN_IMAGE'">
               <div class="img-item">
-                <img @load="messageContainerToBottom" :src="item.data"/>
+                <img @load="messageContainerToBottom" :src="item.data" />
                 <span class="time-holder">{{item.created_at}}
                   <i v-if="item.status === 'pending'" :class="`iconfont ${item.status}`">&#xe63a;</i>
                   <i v-else-if="item.status !== 'sent'" :class="`iconfont ${item.status}`">&#xe63b;</i>
@@ -51,7 +51,7 @@
           </i>
           <input type="text" ref="input" v-model="message" @keydown.enter="clickSendMessage">
           <i v-if="!onceClick" class="iconfont send-icon" @click="clickSendMessage">&#xe644;</i>
-          <CLoading v-else class="text-c-loading" color="#397EE4"/>
+          <CLoading v-else class="text-c-loading" color="#397EE4" />
         </footer>
       </template>
 
@@ -66,7 +66,7 @@
         </div>
 
         <i v-if="!onceClick" class="iconfont img-next" @click="sendImg">&#xe641;</i>
-        <CLoading v-else class="img-c-loading" color="#fff"/>
+        <CLoading v-else class="img-c-loading" color="#fff" />
       </div>
 
     </div>

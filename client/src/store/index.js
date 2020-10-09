@@ -4,7 +4,7 @@ import Package from './package'
 
 import system from './system'
 import user from './user'
-import growth from './growth'
+import users from './users'
 import message from './message'
 import data from './data'
 
@@ -15,7 +15,7 @@ export default new Vuex.Store({
   modules: {
     user,
     system,
-    growth,
+    users,
     message,
     data
   },

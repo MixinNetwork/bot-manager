@@ -1,11 +1,12 @@
 <template>
   <div class="messages">
-    <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState"/>
+    <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState" />
+    <HeaderAction />
     <div class="main-container">
-      <MessageList v-if="currentState==='message'"/>
-      <BroadcastList v-else-if="currentState==='broadcast'"/>
-      <KeyList v-else-if="currentState==='key'"/>
-      <Add v-else-if="currentState==='add'"/>
+      <MessageList v-if="currentState==='message'" />
+      <BroadcastList v-else-if="currentState==='broadcast'" />
+      <KeyList v-else-if="currentState==='key'" />
+      <Add v-else-if="currentState==='add'" />
     </div>
   </div>
 </template>
@@ -17,17 +18,25 @@
   import BroadcastList from './BroadcastList'
   import KeyList from './KeyList'
   import Add from './Add'
+  import HeaderAction from "./HeaderAction"
+
 
   const { mapState, mapActions } = createNamespacedHelpers('message')
 
   export default {
     name: "Message",
     components: {
+      HeaderAction,
       BroadcastList, MessageList, KeyList, Add,
       Tabs,
     },
     computed: {
       ...mapState(['stateList', 'currentState'])
+    },
+    watch: {
+      currentState(val) {
+        console.dir(val)
+      }
     },
     methods: {
       ...mapActions(['toggleState']),
@@ -44,6 +53,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
   }
 
   .head {

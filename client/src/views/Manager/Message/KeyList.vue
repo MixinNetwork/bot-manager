@@ -1,5 +1,5 @@
 <template>
-  <ul>
+  <ul class="item-list">
     <li class="item">
       <span>关键字</span>
       <span>回复类型</span>
@@ -16,7 +16,7 @@
         <button @click="clickDel(item)">删除</button>
       </div>
     </li>
-    <KeyModal/>
+    <KeyModal />
   </ul>
 </template>
 
@@ -25,7 +25,7 @@
   import { createNamespacedHelpers } from 'vuex'
   import KeyModal from "./KeyModal"
 
-  const { mapState } = createNamespacedHelpers('message')
+  const { mapState, mapActions } = createNamespacedHelpers('message')
   const TYPES = {
     PLAIN_TEXT: '文字消息',
     PLAIN_IMAGE: "图片",
@@ -44,15 +44,33 @@
       status: status => STATUS[status]
     },
     methods: {
+      ...mapActions(['deleteMessageReplay', 'getMessageReplayList']),
       clickCheck(item) {
-        this.$DC('message', { keyModalType: "check", keyModal: true })
+        this.$DC('message', {
+          keyModalType: "check",
+          keyModal: true,
+          activeType: item.category,
+          activeKey: item.key,
+          activeContent: item.content
+        })
       },
       clickEdit(item) {
-        this.$DC('message', { keyModalType: "edit", keyModal: true })
+        this.$DC('message', {
+          keyModalType: "edit",
+          keyModal: true,
+          activeType: item.category,
+          activeKey: item.key,
+          activeContent: item.content,
+          activeReplayId: item.replay_id
+        })
       },
       clickDel(item) {
-        this.$confirm("确认删除？", () => {
-
+        this.$confirm("确认删除？", async () => {
+          let t = await this.deleteMessageReplay(item.replay_id)
+          if (t === 'ok') {
+            await this.getMessageReplayList()
+            this.$message('删除成功')
+          }
         })
       }
     }
@@ -61,6 +79,7 @@
 
 
 <style lang="scss" scoped>
+
   .item {
     display: flex;
     align-items: center;
@@ -88,62 +107,62 @@
       }
     }
 
-    span {
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin: 0 10px;
+  }
 
-      &:nth-child(1) {
-        flex: 1;
-      }
+  span {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 10px;
 
-      &:nth-child(2) {
-        width: 100px;
-      }
-
-      &:nth-child(3) {
-        flex: 2;
-      }
-
-      &:nth-child(4) {
-        width: 216px;
-      }
+    &:nth-child(1) {
+      flex: 1;
     }
 
-    .btn {
-      margin: 0 10px;
+    &:nth-child(2) {
+      width: 100px;
+    }
+
+    &:nth-child(3) {
+      flex: 2;
+    }
+
+    &:nth-child(4) {
       width: 216px;
-      display: flex;
-      justify-content: center;
-
-      button {
-        width: 56px;
-        line-height: 30px;
-        border-radius: 20px;
-        color: #fff;
-        margin-right: 16px;
-
-        &:nth-child(1) {
-          background-color: #396AFF;
-        }
-
-        &:nth-child(2) {
-          background-color: #5B73A0;
-        }
-
-        &:nth-child(3) {
-          background-color: #EC5A75;
-          margin-right: 0;
-        }
-
-
-      }
     }
+  }
+
+  .btn {
+    margin: 0 10px;
+    width: 216px;
+    display: flex;
+    justify-content: center;
 
   }
 
+  button {
+    width: 56px;
+    line-height: 30px;
+    border-radius: 20px;
+    color: #fff;
+    margin-right: 16px;
+
+    &:nth-child(1) {
+      background-color: #396AFF;
+    }
+
+    &:nth-child(2) {
+      background-color: #5B73A0;
+    }
+
+    &:nth-child(3) {
+      background-color: #EC5A75;
+      margin-right: 0;
+    }
+
+
+  }
 
   @media screen and (max-width: $adaptWidth) {
 

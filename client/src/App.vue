@@ -1,18 +1,16 @@
 <template>
   <div id="app">
-    <Loading v-if="isLoading"/>
+    <Loading v-if="isLoading" />
     <transition :name="transitionName">
-      <keep-alive>
-        <router-view class="page"/>
-      </keep-alive>
+      <router-view class="page" />
     </transition>
   </div>
 </template>
 
 <script>
-  import Loading from "@/components/Loading";
-  import { mapState, mapActions } from "vuex";
-  import tools from "@/assets/js/tools";
+  import Loading from "@/components/Loading"
+  import { mapState, mapActions } from "vuex"
+  import tools from "@/assets/js/tools"
 
   export default {
     name: "app",
@@ -27,14 +25,14 @@
     },
     watch: {
       themeColor(val) {
-        tools.changeTheme(val);
+        tools.changeTheme(val)
       }
     },
     mounted() {
-      window._vm = this;
+      window._vm = this
       this.initPage()
     }
-  };
+  }
 </script>
 
 <style lang="scss" scoped>

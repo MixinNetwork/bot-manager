@@ -1,33 +1,37 @@
 <template>
   <Modal :show="keyModal">
     <div class="modal-container">
+
+
       <div class="edit-modal" v-if="keyModalType==='edit'">
         <h3>编辑</h3>
         <i class="iconfont close-btn" @click="clickClose">&#xe636;</i>
         <div class="row">
           <span class="title">关键字</span>
-          <input class="key-input" type="text" placeholder="请输入关键字（用空格分开）"/>
+          <input v-model="key" class="key-input" type="text" placeholder="请输入关键字（用空格分开）" />
         </div>
         <div class="row">
           <span class="title">回复内容</span>
-          <Typing/>
+          <Typing />
 
         </div>
         <div class="btns">
           <button @click="clickConfirmBtn()" class="btn save">保存</button>
         </div>
       </div>
+
+
       <div class="check" v-else-if="keyModalType==='check'">
         <h3>关键字回复详情</h3>
         <i class="iconfont close-btn" @click="clickClose">&#xe636;</i>
         <div class="text">
           <label>关键字</label>
-          <span>下载 更新</span>
+          <span>{{key}}</span>
         </div>
 
         <div class="text">
           <label>回复内容</label>
-          <span>https://mixin.one/messenger</span>
+          <span>{{activeContent}}</span>
         </div>
         <div class="btns">
           <button @click="clickEdit" class="btn edit">编辑</button>
@@ -47,17 +51,31 @@
     name: "Broadcast",
     components: { Modal, Typing },
     computed: {
-      ...mapState('message', ['keyModalType', 'keyModal'])
+      ...mapState('message', ['keyModalType', 'keyModal', 'activeContent']),
+      key: {
+        get() {
+          return this.$store.state.message.activeKey
+        },
+        set(activeKey) {
+          this.$DC('message', { activeKey })
+        }
+      }
     },
     methods: {
-      ...mapActions('message', ['sendBroadcast']),
+      ...mapActions('message', ['addOrUpdateMessageReplay', 'getMessageReplayList']),
       clickEdit() {
         this.$DC('message', { keyModalType: "edit" })
       },
       clickConfirmBtn() {
-        if (!this.content) return this.$message('内容不能为空')
-        this.$confirm("确认保存？", () => {
-
+        console.log(this.activeContent)
+        if (!this.activeContent) return this.$message('内容不能为空')
+        this.$confirm("确认保存？", async () => {
+          const t = await this.addOrUpdateMessageReplay()
+          if (t === 'ok') {
+            await this.getMessageReplayList()
+            this.$message('添加成功')
+            this.clickClose()
+          }
         })
       },
       clickClose() {
@@ -129,7 +147,6 @@
     font-size: 14px;
     background: #F8F9FE;
   }
-
 
 
   .btns {

@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/db"
 	"github.com/liuzemei/bot-manager/externals"
 	"github.com/liuzemei/bot-manager/middleware"
 	"github.com/liuzemei/bot-manager/models"
@@ -16,16 +15,23 @@ type UserController struct {
 	beego.Controller
 }
 
-// @Title CreateUser
-// @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
-// @Failure 403 body is empty
-// @router / [post]
+func (c *UserController) Get() {
+	clientId := c.GetString("client_id")
+	userId := c.Ctx.Input.GetData("UserId")
+	if !checkBotManager(userId.(string), clientId, c.Ctx) {
+		log.Println(userId.(string), clientId)
+		return
+	}
 
-func (u *UserController) Post() {
+	status := c.GetString("status")
+	userList := models.GetUsersByClientId(clientId, status)
+	c.Data["json"] = Resp{Data: userList}
+	c.ServeJSON()
+}
+
+func (c *UserController) Post() {
 	var user externals.User
-	err := json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &user)
 	if err != nil {
 		log.Println("/controllers/user.Post Unmarshal", err)
 	}
@@ -33,9 +39,29 @@ func (u *UserController) Post() {
 	if err != nil {
 		log.Println("/controllers/user.Post GetUserById", err)
 	}
-	u.Data["json"] = botUser
+	c.Data["json"] = Resp{Data: botUser}
 	//models.AddUser()
-	u.ServeJSON()
+	c.ServeJSON()
+}
+
+func (c *UserController) Put() {
+	userId := c.Ctx.Input.GetData("UserId")
+	reqModel := new(struct {
+		UserId   string `json:"user_id"`
+		Status   string `json:"status"`
+		ClientId string `json:"client_id"`
+	})
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, reqModel)
+	if err != nil {
+		log.Println("/controllers/user.Put Unmarshal", err)
+	}
+	if !checkBotManager(userId.(string), reqModel.ClientId, c.Ctx) {
+		log.Println(userId, reqModel.ClientId)
+		return
+	}
+	models.UpdateBotUserStatus(reqModel.ClientId, reqModel.UserId, reqModel.Status)
+	c.Data["json"] = Resp{Data: "ok"}
+	c.ServeJSON()
 }
 
 type LoginRespData struct {
@@ -46,12 +72,12 @@ type LoginRespData struct {
 	IdentityNumber string `json:"identity_number"`
 }
 
-func (u *UserController) Login() {
-	code := u.GetString("code")
+func (c *UserController) Login() {
+	code := c.GetString("code")
 	user, token, err := externals.GetUserByCode(code)
 
 	if err != nil || user == nil || token == "" {
-		session.HandleError(u.Ctx, err)
+		session.HandleError(c.Ctx, err)
 		return
 	}
 
@@ -77,32 +103,43 @@ func (u *UserController) Login() {
 		},
 	}
 
-	u.Data["json"] = resp
-	u.ServeJSON()
+	c.Data["json"] = resp
+	c.ServeJSON()
 }
 
-func AddMessageUser(userId string) (*models.UserBase, error) {
-	var hasUser models.User
-	db.Conn.First(&hasUser, "user_id=?", userId)
-	if hasUser.IdentityNumber == "" {
-		userInfo, err := externals.GetUserById(userId)
-		if err != nil {
-			log.Println("获取userInfo出错了", err)
-			return nil, err
+func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBase, error) {
+	botUser := models.GetBotUser(userId, clientId)
+	if botUser.IdentityNumber == "" {
+		usersUser := models.GetUserById(userId)
+		if usersUser.IdentityNumber == "" {
+			userInfo, err := externals.GetUserById(userId)
+			if err != nil {
+				log.Println("获取userInfo出错了", err)
+				return nil, err
+			}
+			modelUser := models.User{
+				UserId:         userInfo.UserId,
+				FullName:       userInfo.FullName,
+				IdentityNumber: userInfo.IdentityNumber,
+				AvatarURL:      userInfo.AvatarURL,
+				AccessToken:    "",
+				CreatedAt:      userInfo.CreatedAt,
+			}
+			models.AddUser(&modelUser)
+			models.AddBotUser(&modelUser, clientId)
+		} else {
+			models.AddBotUser(&models.User{
+				UserId:         userId,
+				FullName:       usersUser.FullName,
+				IdentityNumber: usersUser.IdentityNumber,
+				AvatarURL:      usersUser.AvatarURL,
+				AccessToken:    "",
+			}, clientId)
 		}
-		hasUser = models.User{
-			UserId:         userInfo.UserId,
-			FullName:       userInfo.FullName,
-			IdentityNumber: userInfo.IdentityNumber,
-			AvatarURL:      userInfo.AvatarURL,
-			AccessToken:    "",
-			CreatedAt:      userInfo.CreatedAt,
-		}
-		db.Conn.Create(&hasUser)
 	}
 	return &models.UserBase{
-		FullName:       hasUser.FullName,
-		IdentityNumber: hasUser.IdentityNumber,
-		AvatarURL:      hasUser.AvatarURL,
+		FullName:       botUser.FullName,
+		IdentityNumber: botUser.IdentityNumber,
+		AvatarURL:      botUser.AvatarURL,
 	}, nil
 }

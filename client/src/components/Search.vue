@@ -2,7 +2,7 @@
 
 
   <div
-    v-if="['message', 'growth'].includes(routerName)"
+    v-if="['message', 'user'].includes(routerName)"
     :class="['search', isBlurAndNoContent ? '' : 'search-active']"
     @click="clickSearch"
   >

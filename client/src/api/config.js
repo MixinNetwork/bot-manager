@@ -23,10 +23,11 @@ function backOff() {
 
 request.interceptors.response.use(res => {
   retry = 0
-  let {data, code, description} = res.data
+  let { data, code, description } = res.data
   if (data) return data
   _vm.$message(description)
-  if ([401, 403].includes(code)) _vm.$bus.toAuth()
+  if (code === 401) _vm.$bus.toAuth()
+  if (code === 403) _vm.$message("权限拒绝")
   return undefined
 }, async err => {
   await backOff()
