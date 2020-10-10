@@ -42,6 +42,7 @@ func init() {
 		beego.NSNamespace("/message",
 			beego.NSRouter("/uploadFile", &controllers.MessageController{}, "POST:UploadFile"),
 			beego.NSRouter("/replay", &controllers.MessageController{}, "GET:GetMessageReplay;POST:AddMessageReplay;DELETE:DeleteMessageReplay"),
+			beego.NSRouter("/broadcast", &controllers.MessageController{}, "GET:GetBroadcast;POST:PostBroadcast;DELETE:DeleteBroadcast"),
 			beego.NSInclude(
 				&controllers.MessageController{},
 			),

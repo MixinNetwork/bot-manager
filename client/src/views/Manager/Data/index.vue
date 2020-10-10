@@ -50,8 +50,6 @@
     methods: {
       getOptions,
       ...mapActions('data', ["toggleAsset"])
-    },
-    mounted() {
     }
   }
 

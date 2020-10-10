@@ -71,7 +71,7 @@ func AddOrUpdateUserBotItem(userId, clientId, sessionId, privateKey string) {
 		Hash:       hash,
 	}
 	updateStr := fmt.Sprintf("ON CONFLICT(%s, %s) DO UPDATE SET session_id='%s', private_key='%s', hash='%s'", "user_id", "client_id", sessionId, privateKey, hash)
-	db.Conn.Debug().Set("gorm:insert_option", updateStr).Create(&userBot)
+	db.Conn.Set("gorm:insert_option", updateStr).Create(&userBot)
 }
 
 func GetBotListByUserId(userId string) []UserBase {
@@ -85,7 +85,7 @@ func GetBotListByUserId(userId string) []UserBase {
 	return botList
 }
 
-func GetUserIdsByBotId(clientId string) []string {
+func GetAdminIdsByBotId(clientId string) []string {
 	var userBots []UserBot
 	db.Conn.Table("user_bots").Select("user_id").Where("client_id=?", clientId).Scan(&userBots)
 	var userIds []string
@@ -130,10 +130,18 @@ func GetUserBotByUserId(userId string) []BotInfoRes {
 	return respBots
 }
 
-func CheckUserHasBot(userId, clientId string) bool {
-	var bot UserBot
-	db.Conn.Find(&bot, "user_id=? AND client_id=?", userId, clientId)
-	return bot.ClientId == ""
+func CheckUserHasBot(userId, clientId string) *Bot {
+	var userBot UserBot
+	db.Conn.First(&userBot, "user_id=? AND client_id=?", userId, clientId)
+	if userBot.ClientId == "" {
+		return nil
+	}
+	var bot Bot
+	db.Conn.First(&bot, "client_id=? AND hash=?", userBot.ClientId, userBot.Hash)
+	if bot.Hash == "" {
+		return nil
+	}
+	return &bot
 }
 
 func DeleteUserBotItem(userId, clientId string) {
@@ -159,7 +167,7 @@ func AddOrUpdateBotItem(clientId, sessionId, privateKey, fullName, identityNumbe
 
 func GetAllBot() []UserBot {
 	var allBot []UserBot
-	db.Conn.Debug().Table("bots").Select("client_id, session_id, private_key, hash").Scan(&allBot)
+	db.Conn.Table("bots").Select("client_id, session_id, private_key, hash").Scan(&allBot)
 	return allBot
 }
 

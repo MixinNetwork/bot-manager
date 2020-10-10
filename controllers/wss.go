@@ -171,7 +171,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		// 1. 转发到manager (自己发送的消息)
 		// 2. 转发给其他管理员的 messenger。
 		data := resp.Data
-		adminIds := models.GetUserIdsByBotId(botInfo.ClientId)
+		adminIds := models.GetAdminIdsByBotId(botInfo.ClientId)
 		forwardDashboardMessage(&forwardMessagePropsType{
 			Category:         data.Category,
 			CreatedAt:        utils.FormatTime(data.CreatedAt),

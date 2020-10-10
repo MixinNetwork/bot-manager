@@ -89,3 +89,20 @@ CREATE INDEX IF NOT EXISTS auto_replay_messages_client_id ON auto_replay_message
 CREATE INDEX IF NOT EXISTS auto_replay_messages_client_id_key ON auto_replay_messages(client_id, key);
 
 
+CREATE TABLE IF NOT EXISTS broadcast(
+  client_id     VARCHAR(36) NOT NULL,
+  message_id    VARCHAR(36) NOT NULL,
+  category      VARCHAR(36) NOT NULL,
+  data          TEXT NOT NULL,
+  created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  PRIMARY KEY(client_id, message_id)
+);
+
+CREATE TABLE IF NOT EXISTS broadcast_tmp(
+  client_id              VARCHAR(36) NOT NULL,
+  message_id             VARCHAR(36) NOT NULL,
+  user_id                VARCHAR(36) NOT NULL,
+  conversation_id        VARCHAR(36) NOT NULL,
+  origin_message_id      VARCHAR(36) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS broadcast_tmp_origin_message_id_idx ON broadcast_tmp(origin_message_id);

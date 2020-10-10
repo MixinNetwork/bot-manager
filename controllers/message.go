@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/astaxie/beego"
 	"github.com/liuzemei/bot-manager/durable"
@@ -71,6 +72,117 @@ func (c *MessageController) DeleteMessageReplay() {
 	c.ServeJSON()
 }
 
+func (c *MessageController) GetBroadcast() {
+	clientId := c.GetString("client_id")
+	userId := c.Ctx.Input.GetData("UserId")
+	if !checkBotManager(userId.(string), clientId, c.Ctx) {
+		return
+	}
+	if clientBot := models.CheckUserHasBot(userId.(string), clientId); clientBot == nil {
+		err := session.ForbiddenError()
+		session.HandleError(c.Ctx, err)
+		return
+	}
+	broadcastList := models.GetBroadcast(clientId)
+	c.Data["json"] = Resp{Data: broadcastList}
+	c.ServeJSON()
+}
+
+func (c *MessageController) PostBroadcast() {
+	userId := c.Ctx.Input.GetData("UserId")
+	reqModel := new(struct {
+		ClientId string `json:"client_id"`
+		Category string `json:"category"`
+		Data     string `json:"data"`
+	})
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, reqModel)
+	if err != nil {
+		log.Println("PostBroadcast Unmarshal!!", err)
+	}
+	if !checkBotManager(userId.(string), reqModel.ClientId, c.Ctx) {
+		return
+	}
+	var clientBot *models.Bot
+	if clientBot = models.CheckUserHasBot(userId.(string), reqModel.ClientId); clientBot == nil {
+		err := session.ForbiddenError()
+		session.HandleError(c.Ctx, err)
+		return
+	}
+
+	// 1. 拿到所有的用户
+	userList := models.GetBotUserListById(reqModel.ClientId)
+	// 2. 构建一个 原始消息
+	originMessageId := bot.UuidNewV4().String()
+	models.AddBroadcast(reqModel.ClientId, userId.(string), originMessageId, reqModel.Category, reqModel.Data)
+	// 3. 构建所有的消息
+	var sendMessages []*bot.MessageRequest
+	base64Data := ""
+	if reqModel.Category == "PLAIN_TEXT" {
+		base64Data = base64.StdEncoding.EncodeToString([]byte(reqModel.Data))
+	} else if reqModel.Category == "PLAIN_IMAGE" {
+		_msgData, err := json.Marshal(reqModel.Data)
+		base64Data = base64.StdEncoding.EncodeToString(_msgData)
+		if err != nil {
+			return
+		}
+	}
+	for _, user := range userList {
+		sendMessages = append(sendMessages, &bot.MessageRequest{
+			ConversationId: bot.UniqueConversationId(reqModel.ClientId, user),
+			RecipientId:    user,
+			MessageId:      bot.UuidNewV4().String(),
+			Category:       reqModel.Category,
+			Data:           base64Data,
+		})
+	}
+	err = bot.PostMessages(durable.Ctx, sendMessages, clientBot.ClientId, clientBot.SessionId, clientBot.PrivateKey)
+	if err != nil {
+		log.Println(err)
+	}
+	// 4. 保存所有消息和原始消息的联系
+	for _, message := range sendMessages {
+		models.AddBroadcastTmpMessage(reqModel.ClientId, message.MessageId, originMessageId, message.RecipientId, message.ConversationId)
+	}
+	c.Data["json"] = Resp{Data: "ok"}
+	c.ServeJSON()
+}
+func (c *MessageController) DeleteBroadcast() {
+	userId := c.Ctx.Input.GetData("UserId")
+	clientId := c.GetString("client_id")
+	messageId := c.GetString("message_id")
+	if !checkBotManager(userId.(string), clientId, c.Ctx) {
+		return
+	}
+	var clientBot *models.Bot
+	if clientBot = models.CheckUserHasBot(userId.(string), clientId); clientBot == nil {
+		err := session.ForbiddenError()
+		session.HandleError(c.Ctx, err)
+		return
+	}
+	messageList := models.GetBroadcastTmpMessage(clientId, messageId)
+	var sendMessages []*bot.MessageRequest
+	for _, tmp := range messageList {
+		str := fmt.Sprintf(`{"message_id":"%s"}`, tmp.MessageId)
+		log.Println(str)
+		base64Data := base64.StdEncoding.EncodeToString([]byte(str))
+		sendMessages = append(sendMessages, &bot.MessageRequest{
+			ConversationId: tmp.ConversationId,
+			RecipientId:    tmp.UserId,
+			MessageId:      bot.UuidNewV4().String(),
+			Category:       "MESSAGE_RECALL",
+			Data:           base64Data,
+		})
+	}
+	err := bot.PostMessages(durable.Ctx, sendMessages, clientBot.ClientId, clientBot.SessionId, clientBot.PrivateKey)
+	if err != nil {
+		return
+	}
+	models.DeleteBroadcastTmp(clientId, messageId)
+	models.DeleteBroadcast(clientId, messageId)
+	c.Data["json"] = Resp{Data: "ok"}
+	c.ServeJSON()
+}
+
 func (c *MessageController) UploadFile() {
 	f, h, _ := c.GetFile("file")
 	ext := path.Ext(h.Filename)
@@ -121,7 +233,7 @@ func readMessage(messageCome <-chan models.MessengerChannel, hash string) {
 		}
 
 		// 数据统计
-		adminIds := models.GetUserIdsByBotId(msg.ClientID)
+		adminIds := models.GetAdminIdsByBotId(msg.ClientID)
 		isManager := false
 		for _, id := range adminIds {
 			if id == _msg.UserId {
@@ -129,8 +241,7 @@ func readMessage(messageCome <-chan models.MessengerChannel, hash string) {
 				break
 			}
 		}
-
-		if _msg.Category == "PLAIN_TEXT" {
+		if !isManager && _msg.Category == "PLAIN_TEXT" {
 			decodeBytes, _ := base64.StdEncoding.DecodeString(_msg.Data)
 			decodeString := string(decodeBytes)
 			replayData, replayCategory := models.GetAutoReplayMessageByKey(msg.ClientID, decodeString)

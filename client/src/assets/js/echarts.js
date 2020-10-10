@@ -7,6 +7,7 @@ export default function ({ name, total, today, data, options = {}, formatter = n
     legend.push({ name })
     series.push(getSeries(name, list, _color))
   })
+  let addX = String(total).length * 9 + 45
   return {
     color,
     tooltip: {
@@ -63,7 +64,7 @@ export default function ({ name, total, today, data, options = {}, formatter = n
           type: 'text',
           style: {
             text: '+' + today,
-            x: 100,
+            x: addX,
             y: 66,
             font: '12px',
             fill: '#1BACC0'

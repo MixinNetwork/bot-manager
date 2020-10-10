@@ -48,6 +48,18 @@ class APIS {
     return request.delete('/message/replay', { params: { replay_id, client_id } })
   }
 
+  getBroadcast(client_id) {
+    return request.get('/message/broadcast', { params: { client_id } })
+  }
+
+  postBroadcast({ client_id, category, data }) {
+    return request.post('/message/broadcast', { client_id, category, data })
+  }
+
+  deleteBroadcast({ client_id, message_id }) {
+    return request.delete('/message/broadcast', { params: { client_id, message_id } })
+  }
+
 }
 
 export default new APIS()

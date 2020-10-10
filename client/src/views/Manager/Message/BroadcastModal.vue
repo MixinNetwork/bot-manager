@@ -14,20 +14,19 @@
         <i class="iconfont close-btn" @click="clickClose">&#xe636;</i>
         <div class="text">
           <label>内容</label>
-          <span>【Mixin 公告】Mixin 不支持 BTS 分叉空投，如需领取建议通过 @BigONE 机器人划转至 BigONE 领取空投，@BigONE 机器人现已支持免费、实时划转 BTS，注意请在 2020 年 9 月 10 日 19:00（UTC +8）前划转至 BigONE 账户。</span>
+          <span>{{activeBroadcast.data}}</span>
         </div>
         <div class="text">
           <label>发布人</label>
-          <span>Kelly</span>
+          <span>{{activeBroadcast.full_name}}</span>
         </div>
-        <div class="text">
-          <label>状态</label>
-          <span class="green">已发布</span>
-        </div>
-
+        <!--        <div class="text">-->
+        <!--          <label>状态</label>-->
+        <!--          <span class="green">已发布</span>-->
+        <!--        </div>-->
         <div class="text">
           <label>发布时间</label>
-          <span>2020-04-22 13:04:12</span>
+          <span>{{activeBroadcast.created_at}}</span>
         </div>
         <div class="btns">
           <button class="btn back">撤回</button>
@@ -49,30 +48,19 @@
       return {}
     },
     computed: {
-      ...mapState('message', ['broadcastModalType', 'broadcastModal'])
+      ...mapState('message', ['broadcastModalType', 'broadcastModal', 'activeBroadcast'])
     },
     methods: {
-      ...mapActions('message', ['sendBroadcast']),
+      ...mapActions('message', ['sendBroadcast', 'getBroadcast']),
       clickConfirmBtn() {
         this.$confirm("确认发布？", async () => {
-
+          let data = await this.sendBroadcast()
+          if (data === 'ok') {
+            await this.getBroadcast()
+            this.$DC('message', { broadcastModal: false })
+          }
         })
       },
-      // async clickBtn(state) {
-      //   if (state === 'cancel') {
-      //   } else {
-      //     let data = encodeURIComponent(this.content)
-      //     let t = await this.sendBroadcast(data)
-      //     if (t === 'sending') {
-      //       this.$message('发送中...')
-      //       this.$DC('message', { broadcastModal: false })
-      //       this.content = ''
-      //     } else {
-      //       this.$message('发送失败...')
-      //     }
-      //   }
-      //
-      // },
       clickClose() {
         return this.$DC('message', { broadcastModal: false })
       },

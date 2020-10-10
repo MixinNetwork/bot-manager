@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/liuzemei/bot-manager/db"
 	"github.com/liuzemei/bot-manager/utils"
-	"log"
 	"time"
 )
 
@@ -56,10 +55,6 @@ func init() {
   created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   PRIMARY KEY(user_id, client_id)
 );`)
-
-	log.Println(time.Now())
-	log.Println(utils.FormatTime(time.Now()))
-
 }
 
 func AddUser(u *User) {
@@ -104,16 +99,12 @@ func UpdateBotUserStatus(clientId, userId, status string) {
 func CheckUserStatus(clientId, userId string) bool {
 	var botUser BotUser
 	db.Conn.First(&botUser, "client_id=? AND user_id=?", clientId, userId)
-	return botUser.UserId != "" && botUser.Status == ""
+	return botUser.Status == "block"
 }
-
-//func DeleteBotUser(userID, clientId string) {
-//	db.Conn.Delete(BotUser{}, "user_id=? AND client_id=?", userID, clientId)
-//}
 
 func GetTodayUserCount(clientId string) (count int) {
 	t := utils.GetDate(0)
-	db.Conn.Debug().Table("bot_users").Where("to_char(created_at, 'YYYY-MM-DD')=? AND client_id=?", t, clientId).Count(&count)
+	db.Conn.Table("bot_users").Where("to_char(created_at, 'YYYY-MM-DD')=? AND client_id=?", t, clientId).Count(&count)
 	return
 }
 
@@ -135,6 +126,20 @@ func GetBotUser(userId, clientId string) *UserBaseResp {
 		IdentityNumber: botUser.IdentityNumber,
 		AvatarURL:      botUser.AvatarURL,
 	}
+}
+
+type UserIdType struct {
+	UserId string `gorm:"user_id"`
+}
+
+func GetBotUserListById(clientId string) []string {
+	botUser := make([]*UserIdType, 0)
+	db.Conn.Raw("select user_id from bot_users where client_id=?", clientId).Scan(&botUser)
+	users := make([]string, 0)
+	for _, userId := range botUser {
+		users = append(users, userId.UserId)
+	}
+	return users
 }
 
 type BotUserType struct {
@@ -196,10 +201,3 @@ func GetUsersByClientId(clientId, status string) interface{} {
 		return userList
 	}
 }
-
-//
-//func GetUserById(userID string) *UserBaseResp {
-//	var userInfo UserBaseResp
-//	db.Conn.First(&userInfo, "user_id=?", userID)
-//	return &userInfo
-//}

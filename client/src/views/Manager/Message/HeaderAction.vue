@@ -18,7 +18,6 @@
 </template>
 
 <script>
-
   import { createNamespacedHelpers } from 'vuex'
 
   const { mapState, mapActions } = createNamespacedHelpers('message')
@@ -52,21 +51,10 @@
     methods: {
       ...mapActions(['getMessageReplayList', 'clickAddReplay']),
       clickAddRepay() {
-        this.$DC('message', {
-          keyModalType: "edit",
-          keyModal: true,
-          activeType: "PLAIN_TEXT",
-          activeKey: "",
-          activeContent: ""
-        })
+        this.$DC('message', { keyModalType: "edit", keyModal: true })
       },
       clickAddBroadcast() {
-        this.$DC('message', {
-          broadcastModal: true,
-          activeType: "PLAIN_TEXT",
-          activeKey: "",
-          activeContent: ""
-        })
+        this.$DC('message', { broadcastModalType: "send", broadcastModal: true })
       }
     }
   }

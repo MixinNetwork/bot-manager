@@ -50,6 +50,7 @@
           this.$message("添加成功")
           this.$DC('user', { show_add_bot: false })
           setTimeout(() => {
+            this.$ls.set('bot', client_id)
             window.location.reload()
           }, 500)
         }

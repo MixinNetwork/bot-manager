@@ -6,3 +6,5 @@ vendor
 ssl
 bot-manager
 dist
+*.sh
+*.gz

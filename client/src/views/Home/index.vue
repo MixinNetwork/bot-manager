@@ -33,7 +33,7 @@
   }
 
   .-main-container {
-    min-width: 1000px;
+    min-width: 700px;
   }
 
   @media screen and (max-width: $adaptWidth) {

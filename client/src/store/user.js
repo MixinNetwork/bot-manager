@@ -10,9 +10,6 @@ export default {
     show_add_bot: false,
     bot_list: [],
     active_bot: {},
-
-
-
   }),
   mutations: {
     changeState(state, obj) {
@@ -36,19 +33,25 @@ export default {
       return true
     },
     async getBotList(ctx) {
+      let { get } = _vm.$ls
       const { commit } = ctx
       const bot_list = await api.getBot()
       commit('changeState', { bot_list })
       if (bot_list && bot_list.length > 0) {
-        ctx.dispatch('changeActiveBot', bot_list[0])
+        const cacheClientId = get('bot')
+        let activeIdx = bot_list.findIndex(item => item.client_id === cacheClientId)
+        if (activeIdx === -1) activeIdx = 0
+        ctx.dispatch('changeActiveBot', bot_list[activeIdx])
       }
     },
     async changeActiveBot(ctx, item) {
+      let { set } = _vm.$ls
       const { state, commit } = ctx
       if (state.active_bot.client_id === item.client_id) return
       commit('changeState', { active_bot: item })
       ctx.dispatch('message/toggleBotMessage', item, { root: true })
       ctx.dispatch('data/toggleStatistics', item, { root: true })
+      set('bot', item.client_id)
     }
   }
 }

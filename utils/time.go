@@ -5,7 +5,8 @@ import (
 )
 
 func GetDate(num int) string {
-	var today = time.Now()
+	local, _ := time.LoadLocation("Asia/Chongqing")
+	var today = time.Now().In(local)
 	if num == 0 {
 		return today.Format("2006-01-02")
 	} else {

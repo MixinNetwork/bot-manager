@@ -12,7 +12,7 @@ func checkBotManager(userId, clientId string, ctx *context.Context) bool {
 		session.HandleError(ctx, err)
 		return false
 	}
-	if models.CheckUserHasBot(userId, clientId) {
+	if models.CheckUserHasBot(userId, clientId) == nil {
 		err := session.ForbiddenError()
 		session.HandleError(ctx, err)
 		return false

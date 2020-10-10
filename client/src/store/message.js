@@ -29,29 +29,7 @@ export default {
     // 公告相关
     broadcastModal: false,
     broadcastModalType: 'send',
-    broadcastList: [
-      {
-        content: "【 Mixin 公告 】Mixin 不支持 BTC 分叉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉",
-        full_name: "Kelly 分叉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉",
-        created_at: "2020-04-22 13:04:12",
-        category: "PLAIN_TEXT",
-        status: "finished"
-      },
-      {
-        content: "【 Mixin 公告 】Mixin 不支持 BTC 分叉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉",
-        full_name: "Kelly",
-        created_at: "2020-04-22 13:04:12",
-        category: "PLAIN_IMAGE",
-        status: "finished"
-      },
-      {
-        content: "【 Mixin 公告 】Mixin 不支持 BTC 分叉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉巴拉",
-        full_name: "Kelly",
-        created_at: "2020-04-22 13:04:12",
-        category: "APP_BUTTON",
-        status: "finished"
-      },
-    ],
+    broadcastList: [],
     activeBroadcast: {},
 
     // 关键字回复相关
@@ -113,11 +91,27 @@ export default {
         client_id = ctx.rootState.user.active_bot.client_id
       wss.ws.send(JSON.stringify({ client_id, recipient_id, data, user_id, category }))
     },
-    sendBroadcast(ctx, payload) {
-      let data = payload
-      let group = ctx.state.broadcastGroup === 'chinese' ? 'CNY' : ''
-      return api.sendSpecificUser(data, group)
+
+    async getBroadcast(ctx) {
+      currentClientID = ctx.rootState.user.active_bot.client_id
+      let broadcastList = await api.getBroadcast(currentClientID)
+      ctx.commit('changeState', { broadcastList })
     },
+    sendBroadcast(ctx) {
+      currentClientID = ctx.rootState.user.active_bot.client_id
+      const { activeType, activeContent } = ctx.state
+      return api.postBroadcast({
+        client_id: currentClientID,
+        category: activeType,
+        data: activeContent
+      })
+    },
+    deleteBroadcast(ctx) {
+      currentClientID = ctx.rootState.user.active_bot.client_id
+      const { message_id } = ctx.state.activeBroadcast
+      return api.deleteBroadcast({ client_id: currentClientID, message_id })
+    },
+
     async searchKey({ state, commit }, searchKey) {
       state.searchKey = searchKey
       state.contactList = state.originList.filter(({ full_name, identity_number }) => full_name.includes(searchKey) || identity_number.includes(searchKey))

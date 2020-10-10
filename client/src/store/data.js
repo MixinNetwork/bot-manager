@@ -73,7 +73,7 @@ function getStatisticsDate({ list, today } = {}) {
       },
       {
         name: '总留言',
-        color: '#1BACC0',
+        color: '#5099DD',
         list: totalMessageList
       }
     ]

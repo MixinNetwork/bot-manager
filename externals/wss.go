@@ -27,7 +27,9 @@ func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId str
 	if ignoreCategory[msg.Category] {
 		return nil
 	}
-	if !models.CheckUserStatus(l.ClientId, msg.UserId) {
+	log.Println(l.ClientId, msg.UserId)
+	if models.CheckUserStatus(l.ClientId, msg.UserId) {
+		log.Println("没了")
 		return nil
 	}
 	data, _ := base64.StdEncoding.DecodeString(msg.Data)

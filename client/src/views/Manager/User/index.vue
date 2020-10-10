@@ -2,16 +2,22 @@
   <div class="users">
     <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState" />
     <ul class="main-container">
-      <template>
-        <li v-for="user in userList" class="user-item">
-          <img :src="user.avatar_url">
-          <span class="user-name">{{user.full_name}}</span>
-          <span class="user-number">Mixin ID: {{user.identity_number}}</span>
-          <span class="user-time">加入时间：{{user.created_at}}</span>
-          <span class="user-time" v-if="user.block_time">屏蔽时间：{{user.block_time}}</span>
-          <button @click="clickBlockUser(user)">{{user.block_time ? "恢复":"操作"}}</button>
-        </li>
-      </template>
+      <li :class="['item', currentState==='block' && 'item-block']">
+        <span></span>
+        <span>名称</span>
+        <span>Mixin ID</span>
+        <span>加入时间</span>
+        <span v-if="currentState==='block'">屏蔽时间</span>
+        <span class="btn">操作</span>
+      </li>
+      <li v-for="user in userList" :class="['item', currentState==='block' && 'item-block']">
+        <Avatar :user_info="user" size="38" />
+        <span class="user-name">{{user.full_name}}</span>
+        <span class="user-number">{{user.identity_number}}</span>
+        <span class="user-time">{{user.created_at}}</span>
+        <span class="user-time" v-if="currentState==='block'">{{user.block_time}}</span>
+        <button @click="clickBlockUser(user)">{{user.block_time ? "恢复":"操作"}}</button>
+      </li>
     </ul>
   </div>
 </template>
@@ -19,10 +25,11 @@
 <script>
   import Tabs from '@/components/Tabs'
   import { mapState, mapActions } from 'vuex'
+  import Avatar from "../../../components/Avatar"
 
   export default {
     name: "User",
-    components: { Tabs },
+    components: { Tabs, Avatar },
     computed: {
       ...mapState('users', ['stateList', 'currentState', 'userList'])
     },
@@ -41,15 +48,6 @@
         const status = block_time ? "normal" : "block"
         const currentStatus = block_time ? "block" : "normal"
         const title = block_time ? "确认恢复？" : "确认拉黑？"
-        // if (user.block_time) {
-        //   this.$confirm("确认恢复？", async () => {
-        //     let req = await this.updateUserStatus({ user_id: user.user_id, status: "normal" })
-        //     if (req === "ok") {
-        //       this.$message("操作成功")
-        //       this.getUserList("block")
-        //     }
-        //   })
-        // } else {
         this.$confirm(title, async () => {
           let req = await this.updateUserStatus({ user_id, status })
           if (req === "ok") {
@@ -57,7 +55,6 @@
             this.getUserList(currentStatus)
           }
         })
-        // }
       }
     },
     mounted() {
@@ -79,66 +76,139 @@
 
   .main-container {
     @include main-container();
-
-    display: flex;
-    flex-wrap: wrap;
   }
 
-  .user-item {
-    width: 223px;
-    height: 226px;
-    margin: 20px;
-    border-radius: 12px;
-    background-color: #F8F9FE;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  .item {
+    display: grid;
+    grid-template-columns: 30px 1fr 100px 120px 100px;
     align-items: center;
+    text-align: center;
+    height: 80px;
+    position: relative;
+    background-color: #F8F9FE;
+    padding: 0 32px;
 
+    transition: all .1s;
+    border-radius: 4px;
+    overflow: hidden;
 
-    img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
+    &:nth-child(2n-1) {
+      background-color: #fff;
     }
 
-    .user-name {
-      white-space: nowrap;
-      padding: 0 20px;
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: center;
-      margin: 2px 0 10px;
-      font-weight: 500;
+    &:hover {
+      background: #E9E7FC;
 
-      font-size: 16px;
-    }
-
-    .user-number {
-      font-size: 14px;
-      color: #B1B4CF;
-    }
-
-    .user-time {
-      font-size: 12px;
-      color: #B1B4CF;
-    }
-
-    button {
-      margin-top: 26px;
-      height: 30px;
-      width: 76px;
-      color: #fff;
-      background-color: #5B73A0;
-      border-radius: 20px;
-
-      &:hover {
-        background: #396AFF;
+      .session {
+        background: #4C4471;
+        color: #fff;
       }
     }
 
+    img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .message {
+      margin-left: 12px;
+      font-size: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      p,
+      i {
+
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      p {
+        color: #4C4471;
+      }
+
+      i {
+        color: #A5A7C8;
+      }
+    }
+
+    .date {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 20px;
+
+      p {
+        font-size: 12px;
+        color: #A5A7C8;
+      }
+
+      span {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #F05366;
+
+        &.ok {
+          color: #2FC273;
+        }
+      }
+    }
+
+    .session {
+      font-size: 14px;
+      padding: 5px 14px;
+      cursor: pointer;
+      color: #4C4471;
+      border: 1px solid #4C4471;
+      box-sizing: border-box;
+      border-radius: 20px;
+      margin: 0 32px;
+    }
   }
+
+  .item-block {
+    grid-template-columns: 30px 1fr 100px 140px 140px 100px;
+  }
+
+  .user-name {
+    white-space: nowrap;
+    padding: 0 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    margin: 2px 0 10px;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  .user-number {
+    font-size: 14px;
+    color: #B1B4CF;
+  }
+
+  .user-time {
+    font-size: 12px;
+    color: #B1B4CF;
+  }
+
+  button {
+    height: 30px;
+    width: 76px;
+    color: #fff;
+    background-color: #5B73A0;
+    border-radius: 20px;
+    margin: 0 auto;
+
+    &:hover {
+      background: #396AFF;
+    }
+  }
+
 
   @media screen and (max-width: $adaptWidth) {
     .users {
