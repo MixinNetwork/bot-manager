@@ -32,8 +32,9 @@
     },
     computed: {
       bgColor() {
-        if (this.user_info.avatar_url) return ""
-        return getAvatarColorById(this.user_info.user_id || this.user_info.client_id)
+        const { avatar_url, user_id, client_id } = this.user_info
+        if (avatar_url) return ""
+        return getAvatarColorById(user_id || client_id)
       }
     },
   }

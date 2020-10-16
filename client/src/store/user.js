@@ -1,15 +1,18 @@
 import api from '../api'
 import { getAvatarColorById } from "../assets/js/color"
+import tools from '@/assets/js/tools'
 
 export default {
   namespaced: true,
   state: () => ({
-    token: '',
     user_info: {},
 
     show_add_bot: false,
     bot_list: [],
     active_bot: {},
+
+    addFavoriteModal: false,
+    favorite: []
   }),
   mutations: {
     changeState(state, obj) {
@@ -52,6 +55,24 @@ export default {
       ctx.dispatch('message/toggleBotMessage', item, { root: true })
       ctx.dispatch('data/toggleStatistics', item, { root: true })
       set('bot', item.client_id)
+      if (item.is_reload) window.location.href = '/'
+    },
+    async getBotFavorite(ctx) {
+      let currentClientID = ctx.state.active_bot.client_id
+      while (!currentClientID) {
+        await tools.delay(0.1)
+        currentClientID = ctx.state.active_bot.client_id
+      }
+      const favorite = await api.getBotFavorite(currentClientID)
+      ctx.commit('changeState', { favorite })
+    },
+    addBotFavorite(ctx, id) {
+      let currentClientID = ctx.state.active_bot.client_id
+      return api.addBotFavorite(currentClientID, id)
+    },
+    delBotFavorite(ctx, id) {
+      let currentClientID = ctx.state.active_bot.client_id
+      return api.deleteBotFavorite(currentClientID, id)
     }
   }
 }

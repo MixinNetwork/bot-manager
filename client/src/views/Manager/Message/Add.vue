@@ -1,18 +1,28 @@
 <template>
   <div class="added">
     <Typing />
-    <button class="save">保存</button>
+    <button @click="clickSave" class="save">保存</button>
   </div>
 </template>
 
 <script>
   import Typing from "@/components/Typing"
+  import { createNamespacedHelpers } from 'vuex'
+
+  const { mapActions } = createNamespacedHelpers('message')
 
   export default {
     components: { Typing },
     methods: {
-      clickSave() {
-        this.$DC('message', { activeKey: "Hi 你好" })
+      ...mapActions(['addOrUpdateMessageReplay']),
+      async clickSave() {
+        this.$confirm('确认保存？', async () => {
+          this.$DC('message', { activeKey: "hi 你好" })
+          const t = await this.addOrUpdateMessageReplay()
+          if (t === 'ok') {
+            this.$message('保存成功')
+          }
+        })
       }
     }
   }

@@ -68,17 +68,16 @@ func init() {
 				defer conn.Close()
 				for {
 					msg, op, err := wsutil.ReadClientData(conn)
-					if err != nil {
-						// handle error
-					}
-					if op != 1 {
+					if op != 1 || err != nil {
 						for hash, hashMap := range models.HashManagerMap {
 							for _userId, channel := range hashMap {
 								if _userId == userId && channel != nil {
+									close(models.HashManagerMap[hash][userId])
 									delete(models.HashManagerMap[hash], userId)
 								}
 							}
 						}
+						close(models.ChangeBotWss[userId])
 						delete(models.ChangeBotWss, userId)
 						return
 					}
@@ -273,7 +272,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		status = "read"
 	}
 
-	userInfo, err := GetMessageUserAutoUpdate(msg.UserId, clientId)
+	userInfo, err := GetMessageUserAutoUpdate(userId, clientId)
 	if err != nil || userInfo == nil {
 		log.Println("/controllers/wss forwardDashboardMessage GetMessageUserAutoUpdate", err)
 	}

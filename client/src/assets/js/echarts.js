@@ -80,6 +80,7 @@ export default function ({ name, total, today, data, options = {}, formatter = n
     },
     xAxis: {
       type: 'time',
+      minInterval: 3600 * 24 * 1000,
       axisLabel: {
         fontSize: 10,
         color: '#A5A7C8',
@@ -100,6 +101,7 @@ export default function ({ name, total, today, data, options = {}, formatter = n
     },
     yAxis: {
       type: 'value',
+      minInterval: 1,
       axisLabel: {
         fontSize: 10,
         color: '#A5A7C8'

@@ -90,7 +90,7 @@ func GetBroadcast(clientId string) []*BroadcastResp {
 }
 
 func DeleteBroadcast(clientId, messageId string) {
-	db.Conn.Debug().Delete(&Broadcast{}, "client_id=? AND message_id=?", clientId, messageId)
+	db.Conn.Delete(&Broadcast{}, "client_id=? AND message_id=?", clientId, messageId)
 }
 
 func AddBroadcastTmpMessage(clientId, messageId, originMessageId, userId, conversationId string) {
@@ -110,5 +110,5 @@ func GetBroadcastTmpMessage(clientId, originMessageId string) []*BroadcastTmp {
 }
 
 func DeleteBroadcastTmp(clientId, originMessageId string) {
-	db.Conn.Debug().Delete(&BroadcastTmp{}, "client_id=? AND origin_message_id=?", clientId, originMessageId)
+	db.Conn.Delete(&BroadcastTmp{}, "client_id=? AND origin_message_id=?", clientId, originMessageId)
 }

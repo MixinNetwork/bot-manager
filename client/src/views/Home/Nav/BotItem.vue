@@ -7,7 +7,7 @@
       </div>
     </template>
     <template v-else>
-      <Avatar :user_info="botItem"/>
+      <Avatar :user_info="botItem" />
       <div class="bot-info">
         <span class="bot-name">{{botItem.full_name}}</span>
         <span class="bot-number">{{botItem.identity_number}}</span>
@@ -45,7 +45,7 @@
       ...mapActions('user', ['changeActiveBot']),
       clickBotItem() {
         if (!this.isHead && !this.isAdd) {
-          this.changeActiveBot(this.botItem)
+          this.changeActiveBot({ ...this.botItem, is_reload: true })
           this.$emit('toggleList')
         }
         if (this.isHead) this.$emit('toggleList')

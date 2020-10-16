@@ -8,6 +8,9 @@ import (
 	_ "github.com/liuzemei/bot-manager/middleware"
 	"github.com/liuzemei/bot-manager/models"
 	_ "github.com/liuzemei/bot-manager/routers"
+	"net/http"
+	_ "net/http/pprof"
+	"runtime"
 )
 
 func main() {
@@ -23,9 +26,11 @@ func main() {
 		models.SaveTodayData(-1)
 		return nil
 	})
-	//tk.Run()
 	toolbox.AddTask("myTask", tk)
 	toolbox.StartTask()
-
+	go func() {
+		runtime.SetBlockProfileRate(1) // 开启对阻塞操作的跟踪
+		http.ListenAndServe("0.0.0.0:6060", nil)
+	}()
 	beego.Run()
 }

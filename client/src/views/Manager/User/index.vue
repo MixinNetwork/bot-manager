@@ -3,7 +3,6 @@
     <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState" />
     <ul class="main-container">
       <li :class="['item', currentState==='block' && 'item-block']">
-        <span></span>
         <span>名称</span>
         <span>Mixin ID</span>
         <span>加入时间</span>
@@ -11,8 +10,10 @@
         <span class="btn">操作</span>
       </li>
       <li v-for="user in userList" :class="['item', currentState==='block' && 'item-block']">
-        <Avatar :user_info="user" size="38" />
-        <span class="user-name">{{user.full_name}}</span>
+        <div class="user-name">
+          <Avatar :user_info="user" size="38" />
+          <span>{{user.full_name}}</span>
+        </div>
         <span class="user-number">{{user.identity_number}}</span>
         <span class="user-time">{{user.created_at}}</span>
         <span class="user-time" v-if="currentState==='block'">{{user.block_time}}</span>
@@ -80,7 +81,7 @@
 
   .item {
     display: grid;
-    grid-template-columns: 30px 1fr 100px 120px 100px;
+    grid-template-columns: 1fr 100px 120px 100px;
     align-items: center;
     text-align: center;
     height: 80px;
@@ -172,18 +173,29 @@
   }
 
   .item-block {
-    grid-template-columns: 30px 1fr 100px 140px 140px 100px;
+    grid-template-columns: 1fr 100px 140px 140px 100px;
   }
 
   .user-name {
-    white-space: nowrap;
-    padding: 0 20px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
     text-align: center;
     margin: 2px 0 10px;
     font-weight: 500;
     font-size: 16px;
+    overflow: hidden;
+
+    .avatar {
+      min-width: 38px;
+    }
+
+
+    span {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0 20px;
+      overflow: hidden;
+    }
   }
 
   .user-number {

@@ -34,7 +34,8 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/bot",
-			beego.NSRouter("/", &controllers.BotController{}, "POST:Add;GET:Get"),
+			beego.NSRouter("/", &controllers.BotController{}, "GET:Get;POST:Add"),
+			beego.NSRouter("/favorite", &controllers.BotController{}, "GET:FavoriteGet;POST:FavoriteAdd;DELETE:FavoriteDel"),
 			beego.NSInclude(
 				&controllers.BotController{},
 			),

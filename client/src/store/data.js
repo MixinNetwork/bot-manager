@@ -28,22 +28,18 @@ export default {
 }
 
 
-const newUserList = []
-const totalUserList = []
+let newUserList = []
+let totalUserList = []
 
-const newMessageList = []
-const totalMessageList = []
+let newMessageList = []
+let totalMessageList = []
 
 let totalUserCount = 0
 let totalMessageCount = 0
 
 function getStatisticsDate({ list, today } = {}) {
-  if (list) {
-    for (const dataInfo of list) {
-      handleDaily(dataInfo)
-    }
-  }
-  handleDaily(today)
+  initData()
+  handleListData(list, today)
   let userObj = {
     name: '用户',
     total: totalUserCount,
@@ -81,11 +77,43 @@ function getStatisticsDate({ list, today } = {}) {
   return { statistics: [userObj, messageObj] }
 }
 
+function initData() {
+  newUserList = []
+  totalUserList = []
+  newMessageList = []
+  totalMessageList = []
+  totalUserCount = 0
+  totalMessageCount = 0
+}
+
+function handleListData(list, today) {
+  if (list.length === 0) return handleDaily(today)
+  let todayDate = today.date
+  let currentDate = list[0].date
+  const mapList = transferListToMap(list)
+  while (true) {
+    if (currentDate === todayDate) break
+    handleDaily(mapList[currentDate] || { date: currentDate })
+    currentDate = getNextDate(currentDate)
+  }
+  handleDaily(today)
+}
+
+function getNextDate(date) {
+  date = new Date(Number(new Date(date)) + 86400000)
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+}
+
+function transferListToMap(list) {
+  let obj = {}
+  list.forEach(item => obj[item.date] = item)
+  return obj
+}
+
 function handleDaily(dataInfo) {
   const { date, users = 0, messages = 0 } = dataInfo
   totalUserList.push([date, totalUserCount += users])
   newUserList.push([date, users])
-
   totalMessageList.push([date, totalMessageCount += messages])
   newMessageList.push([date, messages])
 }

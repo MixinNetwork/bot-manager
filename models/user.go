@@ -26,6 +26,7 @@ type UserBaseResp struct {
 	FullName       string `json:"full_name"`
 	IdentityNumber string `json:"identity_number"`
 	AvatarURL      string `json:"avatar_url"`
+	UserId         string `json:"user_id"`
 }
 
 type BotUser struct {
@@ -115,7 +116,23 @@ func GetUserById(userId string) UserBaseResp {
 		FullName:       userInfo.FullName,
 		IdentityNumber: userInfo.IdentityNumber,
 		AvatarURL:      userInfo.AvatarURL,
+		UserId:         userInfo.UserId,
 	}
+}
+
+func GetUserByIds(userIds []string) []*UserBaseResp {
+	userInfos := make([]*User, 0)
+	db.Conn.Find(&userInfos, "user_id in (?)", userIds)
+	resp := make([]*UserBaseResp, 0)
+	for _, info := range userInfos {
+		resp = append(resp, &UserBaseResp{
+			FullName:       info.FullName,
+			IdentityNumber: info.IdentityNumber,
+			AvatarURL:      info.AvatarURL,
+			UserId:         info.UserId,
+		})
+	}
+	return resp
 }
 
 func GetBotUser(userId, clientId string) *UserBaseResp {

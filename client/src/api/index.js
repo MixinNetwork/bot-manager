@@ -36,6 +36,18 @@ class APIS {
     return request.get('/bot')
   }
 
+  getBotFavorite(client_id) {
+    return request.get('/bot/favorite', { params: { client_id } })
+  }
+
+  addBotFavorite(client_id, id) {
+    return request.post('/bot/favorite', {}, { params: { client_id, id } })
+  }
+
+  deleteBotFavorite(client_id, id) {
+    return request.delete('/bot/favorite', { params: { client_id, id } })
+  }
+
   postMessageReplay(data) {
     return request.post('/message/replay', data)
   }

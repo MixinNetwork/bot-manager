@@ -2,7 +2,6 @@ package externals
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -68,6 +67,14 @@ func GetUserById(userId string) (*User, error) {
 	return &user, nil
 }
 
+func GetToken(method, uri, body string) (string, error) {
+	accessToken, err := bot.SignAuthenticationToken(clientId, sessionId, privateKey, method, uri, body)
+	if err != nil {
+		return "", err
+	}
+	return accessToken, err
+}
+
 func UploadFile(body io.Reader, size int64) (*bot.Attachment, error) {
 	attachment, err := bot.CreateAttachment(durable.Ctx, clientId, sessionId, privateKey)
 	if err != nil {
@@ -92,9 +99,7 @@ func uploadToAMZ(url string, body io.Reader, size int64) {
 		log.Println("执行失败了 err", err)
 		return
 	}
-	defer response.Body.Close()
-	resp, err := ioutil.ReadAll(response.Body)
-	log.Println(string(resp))
+	response.Body.Close()
 }
 
 func HandlePrivateKey(privateKey string) string {

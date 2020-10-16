@@ -31,12 +31,12 @@ func init() {
 		if ctx.Input.Method() == "OPTIONS" {
 			return
 		}
-		header := ctx.Input.Header("Authorization")
-		if !strings.HasPrefix(header, "Bearer ") {
+		token := ctx.Input.Header("Authorization")
+		if !strings.HasPrefix(token, "Bearer ") {
 			handleUnauthorized(ctx)
 			return
 		}
-		userId, err := Parse(header[7:])
+		userId, err := Parse(token[7:])
 		if err != nil || userId == "" {
 			handleUnauthorized(ctx)
 			return

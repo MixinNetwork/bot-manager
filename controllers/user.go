@@ -19,7 +19,6 @@ func (c *UserController) Get() {
 	clientId := c.GetString("client_id")
 	userId := c.Ctx.Input.GetData("UserId")
 	if !checkBotManager(userId.(string), clientId, c.Ctx) {
-		log.Println(userId.(string), clientId)
 		return
 	}
 
@@ -56,7 +55,6 @@ func (c *UserController) Put() {
 		log.Println("/controllers/user.Put Unmarshal", err)
 	}
 	if !checkBotManager(userId.(string), reqModel.ClientId, c.Ctx) {
-		log.Println(userId, reqModel.ClientId)
 		return
 	}
 	models.UpdateBotUserStatus(reqModel.ClientId, reqModel.UserId, reqModel.Status)

@@ -13,6 +13,7 @@ import (
 	"github.com/liuzemei/bot-manager/utils"
 	"log"
 	"path"
+	"strings"
 )
 
 type MessageController struct {
@@ -163,7 +164,6 @@ func (c *MessageController) DeleteBroadcast() {
 	var sendMessages []*bot.MessageRequest
 	for _, tmp := range messageList {
 		str := fmt.Sprintf(`{"message_id":"%s"}`, tmp.MessageId)
-		log.Println(str)
 		base64Data := base64.StdEncoding.EncodeToString([]byte(str))
 		sendMessages = append(sendMessages, &bot.MessageRequest{
 			ConversationId: tmp.ConversationId,
@@ -243,7 +243,7 @@ func readMessage(messageCome <-chan models.MessengerChannel, hash string) {
 		}
 		if !isManager && _msg.Category == "PLAIN_TEXT" {
 			decodeBytes, _ := base64.StdEncoding.DecodeString(_msg.Data)
-			decodeString := string(decodeBytes)
+			decodeString := strings.ToLower(string(decodeBytes))
 			replayData, replayCategory := models.GetAutoReplayMessageByKey(msg.ClientID, decodeString)
 			if replayData != "" {
 				forwardDashboardMessage(&forwardMessagePropsType{
@@ -389,7 +389,8 @@ func readMessage(messageCome <-chan models.MessengerChannel, hash string) {
 			}
 			err := bot.PostMessages(durable.Ctx, sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
 			if err != nil {
-				log.Println("转发普通消息出问题了。", err)
+				data, _ := json.Marshal(sendMessages)
+				log.Println("转发普通消息出问题了。", err, data)
 			}
 		}
 	}

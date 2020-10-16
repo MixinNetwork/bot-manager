@@ -126,9 +126,10 @@ export default {
     addOrUpdateMessageReplay(ctx) {
       currentClientID = ctx.rootState.user.active_bot.client_id
       const { activeType, activeContent, activeKey, activeReplayId } = ctx.state
+      const keys = activeKey.toLowerCase().split(" ")
       return api.postMessageReplay({
         replay_id: activeReplayId || "",
-        keys: activeKey.split(" "),
+        keys,
         category: activeType,
         data: activeContent,
         client_id: currentClientID,
@@ -139,7 +140,7 @@ export default {
       const replayList = await api.getMessageReplay(currentClientID)
       const keyList = []
       replayList.forEach(item => {
-        if (["Hi", "你好"].includes(item.key)) {
+        if (["hi", "你好"].includes(item.key)) {
           return ctx.commit('changeState', {
             helloData: item.data,
             helloCategory: item.category,

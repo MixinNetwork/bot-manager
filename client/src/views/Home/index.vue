@@ -26,7 +26,7 @@
 <style lang="scss" scoped>
   .home {
     display: flex;
-    padding: 30px 32px 10px 32px;
+    padding: 30px 12px 10px 32px;
     box-sizing: border-box;
     background-color: #F8F9FE;
     overflow: auto;

@@ -115,12 +115,12 @@ func GetUserBotHashByUserId(userId string) []string {
 	return hashes
 }
 
-func GetUserBotByUserId(userId string) []BotInfoRes {
+func GetUserBotByUserId(userId string) []*BotInfoRes {
 	var bots []Bot
 	db.Conn.Raw("SELECT bots.client_id, bots.full_name, bots.identity_number, bots.avatar_url FROM user_bots LEFT JOIN bots ON user_bots.client_id=bots.client_id WHERE user_id=$1", userId).Scan(&bots)
-	var respBots []BotInfoRes
+	respBots := make([]*BotInfoRes, 0)
 	for _, bot := range bots {
-		respBots = append(respBots, BotInfoRes{
+		respBots = append(respBots, &BotInfoRes{
 			FullName:       bot.FullName,
 			IdentityNumber: bot.IdentityNumber,
 			AvatarURL:      bot.AvatarURL,
