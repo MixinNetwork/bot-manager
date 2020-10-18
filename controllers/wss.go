@@ -28,6 +28,7 @@ func connectBot(botInfo models.UserBot) {
 	go readMessage(messageTransfer, botInfo.Hash)
 	err := externals.StartWebSockets(botInfo.ClientId, botInfo.SessionId, botInfo.PrivateKey, botInfo.Hash)
 	if err != nil {
+		close(models.HashMessengerMap[botInfo.Hash])
 		delete(models.HashMessengerMap, botInfo.Hash)
 	}
 }
@@ -77,8 +78,10 @@ func init() {
 								}
 							}
 						}
-						close(models.ChangeBotWss[userId])
-						delete(models.ChangeBotWss, userId)
+						if models.ChangeBotWss[userId] != nil {
+							close(models.ChangeBotWss[userId])
+							delete(models.ChangeBotWss, userId)
+						}
 						return
 					}
 					if string(msg) == "ping" {
