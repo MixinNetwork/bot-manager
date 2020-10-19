@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/durable"
 	"github.com/liuzemei/bot-manager/externals"
 	"github.com/liuzemei/bot-manager/models"
 	"github.com/liuzemei/bot-manager/session"
@@ -150,7 +149,7 @@ func (c *MessageController) DeleteBroadcast() {
 			Data:           base64Data,
 		})
 	}
-	err := bot.PostMessages(durable.Ctx, sendMessages, clientBot.ClientId, clientBot.SessionId, clientBot.PrivateKey)
+	err := externals.SendBatchMessage(sendMessages, clientBot.ClientId, clientBot.SessionId, clientBot.PrivateKey)
 	if err != nil {
 		return
 	}

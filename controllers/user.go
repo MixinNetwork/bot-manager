@@ -125,7 +125,13 @@ func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBase, error)
 			}
 			models.AddUser(&modelUser)
 			models.AddBotUser(&modelUser, clientId)
+			botUser.FullName = userInfo.FullName
+			botUser.IdentityNumber = userInfo.IdentityNumber
+			botUser.AvatarURL = userInfo.AvatarURL
 		} else {
+			botUser.FullName = usersUser.FullName
+			botUser.IdentityNumber = usersUser.IdentityNumber
+			botUser.AvatarURL = usersUser.AvatarURL
 			models.AddBotUser(&models.User{
 				UserId:         userId,
 				FullName:       usersUser.FullName,

@@ -109,10 +109,10 @@ func GetTodayUserCount(clientId string) (count int) {
 	return
 }
 
-func GetUserById(userId string) UserBaseResp {
+func GetUserById(userId string) *UserBaseResp {
 	var userInfo User
 	db.Conn.First(&userInfo, "user_id=?", userId)
-	return UserBaseResp{
+	return &UserBaseResp{
 		FullName:       userInfo.FullName,
 		IdentityNumber: userInfo.IdentityNumber,
 		AvatarURL:      userInfo.AvatarURL,

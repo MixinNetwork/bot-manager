@@ -5,7 +5,7 @@ import (
 	"github.com/astaxie/beego/context"
 )
 
-func init() {
+func cros() {
 	var FilterGateWay = func(ctx *context.Context) {
 		ctx.ResponseWriter.Header().Set("Access-Control-Allow-Origin", "*")
 		//允许访问源

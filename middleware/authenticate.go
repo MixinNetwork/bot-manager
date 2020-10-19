@@ -26,7 +26,7 @@ type customClaims struct {
 
 var key = []byte(beego.AppConfig.String("claimKey"))
 
-func init() {
+func authenticate() {
 	var FilterUser = func(ctx *context.Context) {
 		if ctx.Input.Method() == "OPTIONS" {
 			return

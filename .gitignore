@@ -8,3 +8,4 @@ bot-manager
 dist
 *.sh
 *.gz
+.vscode

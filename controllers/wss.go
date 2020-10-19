@@ -257,7 +257,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 		}
 		status = "pending"
 		if len(sendMessages) > 0 {
-			err := bot.PostMessages(durable.Ctx, sendMessages, clientId, sessionId, privateKey)
+			err := externals.SendBatchMessage(sendMessages, clientId, sessionId, privateKey)
 			if err != nil {
 				log.Println("/controllers/wss forwardDashboardMessage, 发送给其他管理员", err)
 			}

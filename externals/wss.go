@@ -77,3 +77,34 @@ func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 		}
 	}
 }
+
+func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, privateKey string) error {
+	if len(messages) <= 100 {
+		err := bot.PostMessages(durable.Ctx, messages, clientId, sessionId, privateKey)
+		if err != nil {
+			return err
+		}
+	} else {
+		currentMessage := make([]*bot.MessageRequest, 0)
+		overMessage := make([]*bot.MessageRequest, 0)
+		for {
+			if len(overMessage) > 100 {
+				currentMessage = overMessage[:100]
+				err := bot.PostMessages(durable.Ctx, currentMessage, clientId, sessionId, privateKey)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				overMessage = overMessage[100:]
+			} else {
+				err := bot.PostMessages(durable.Ctx, currentMessage, clientId, sessionId, privateKey)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				break
+			}
+		}
+	}
+	return nil
+}

@@ -4,13 +4,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/MixinNetwork/bot-api-go-client"
-	"github.com/liuzemei/bot-manager/durable"
+	"github.com/liuzemei/bot-manager/externals"
 	"github.com/liuzemei/bot-manager/models"
 	"github.com/liuzemei/bot-manager/utils"
 	"log"
 	"strings"
 )
 
+// 客户端消息入口
 func readMessage(messageCome <-chan models.MessengerChannel, hash string) {
 	for msg := range messageCome {
 		_msg := &msg.Message
@@ -101,7 +102,7 @@ func handleAutoReplayMessage(msg models.MessengerChannel, hash string, adminIds 
 			ConversationId: _msg.ConversationId,
 			RecipientId:    _msg.UserId,
 		})
-		err := bot.PostMessages(durable.Ctx, sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
+		err := externals.SendBatchMessage(sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
 		if err != nil {
 			log.Println("转发自动回复的消息出问题了。", err)
 			return true
@@ -177,7 +178,7 @@ func handleAdminClientMessageWithQuote(msg models.MessengerChannel, adminIds []s
 		Data:           _msg.Data,
 		QuoteMessageId: originMessage.OriginMessageId,
 	})
-	err := bot.PostMessages(durable.Ctx, sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
+	err := externals.SendBatchMessage(sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
 	if err != nil {
 		log.Println("转发管理员消息出问题了。", err)
 		return false
@@ -242,7 +243,7 @@ func sendBroadcast(clientBot *models.Bot, category, data string, isBase64Data bo
 			Data:           base64Data,
 		})
 	}
-	err := bot.PostMessages(durable.Ctx, sendMessages, clientBot.ClientId, clientBot.SessionId, clientBot.PrivateKey)
+	err := externals.SendBatchMessage(sendMessages, clientBot.ClientId, clientBot.SessionId, clientBot.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +276,7 @@ func handleNonAdminClientMessage(msg models.MessengerChannel, adminIds []string)
 		})
 	}
 	if sendMessages != nil {
-		err := bot.PostMessages(durable.Ctx, sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
+		err := externals.SendBatchMessage(sendMessages, msg.ClientID, msg.SessionID, msg.PrivateKey)
 		if err != nil {
 			log.Printf("转发普通消息出问题了。 %#v", err)
 			log.Printf("%#v", sendMessages[0])
