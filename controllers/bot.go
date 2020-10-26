@@ -99,7 +99,7 @@ func (c *BotController) FavoriteGet() {
 	if err != nil {
 		return
 	}
-	body, err := botApi.Request(durable.Ctx, "GET", uri, []byte{}, accessToken, botApi.UuidNewV4().String())
+	body, err := botApi.Request(durable.Ctx, "GET", uri, []byte{}, accessToken)
 	if err != nil {
 		return
 	}
@@ -154,7 +154,7 @@ func (c *BotController) FavoriteAdd() {
 	if err != nil {
 		return
 	}
-	body, err := botApi.Request(durable.Ctx, "POST", uri, []byte{}, accessToken, botApi.UuidNewV4().String())
+	body, err := botApi.Request(durable.Ctx, "POST", uri, []byte{}, accessToken)
 	if err != nil {
 		session.HandleBadRequestError(c.Ctx)
 		return
@@ -189,7 +189,7 @@ func (c *BotController) FavoriteDel() {
 	if err != nil {
 		return
 	}
-	_, err = botApi.Request(durable.Ctx, "POST", uri, []byte{}, accessToken, botApi.UuidNewV4().String())
+	_, err = botApi.Request(durable.Ctx, "POST", uri, []byte{}, accessToken)
 	if err != nil {
 		session.HandleBadRequestError(c.Ctx)
 		return

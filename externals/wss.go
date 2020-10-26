@@ -108,3 +108,7 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 	}
 	return nil
 }
+
+func init() {
+	bot.SetBlazeUri("blaze.mixin.one")
+}

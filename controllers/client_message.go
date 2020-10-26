@@ -253,6 +253,9 @@ func sendBroadcast(clientBot *models.Bot, category, data string, isBase64Data bo
 // 处理非管理员客户端消息
 func handleNonAdminClientMessage(msg models.MessengerChannel, adminIds []string) {
 	_msg := &msg.Message
+	if _msg.Category == "MESSAGE_RECALL" {
+		return
+	}
 	var sendMessages []*bot.MessageRequest
 	for _, userId := range adminIds {
 		conversationId := bot.UniqueConversationId(msg.ClientID, userId)

@@ -154,7 +154,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		if err != nil {
 			return err
 		}
-		body, err := bot.Request(durable.Ctx, "POST", "/messages", msg, accessToken, bot.UuidNewV4().String())
+		body, err := bot.Request(durable.Ctx, "POST", "/messages", msg, accessToken)
 		if err != nil {
 			return err
 		}
