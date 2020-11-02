@@ -67,6 +67,11 @@ func init() {
 			go changeWssConnect(models.ChangeBotWss[userId], conn, userId)
 			go func() {
 				defer conn.Close()
+				defer func() {
+					if r := recover(); r != nil {
+						log.Println("/controllers/wss go func error", r)
+					}
+				}()
 				for {
 					msg, op, err := wsutil.ReadClientData(conn)
 					if op != 1 || err != nil {

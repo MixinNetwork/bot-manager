@@ -38,6 +38,7 @@ let totalUserCount = 0
 let totalMessageCount = 0
 
 function getStatisticsDate({ list, today } = {}) {
+
   initData()
   handleListData(list, today)
   let userObj = {
@@ -101,7 +102,7 @@ function handleListData(list, today) {
 
 function getNextDate(date) {
   date = new Date(Number(new Date(date)) + 86400000)
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+  return date.toISOString().slice(0, 10)
 }
 
 function transferListToMap(list) {

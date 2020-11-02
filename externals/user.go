@@ -82,7 +82,6 @@ func UploadFile(body io.Reader, size int64) (*bot.Attachment, error) {
 		return nil, err
 	}
 	uploadToAMZ(attachment.UploadUrl, body, size)
-
 	return attachment, nil
 }
 func uploadToAMZ(url string, body io.Reader, size int64) {
