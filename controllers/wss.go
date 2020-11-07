@@ -228,7 +228,6 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 	case "PLAIN_IMAGE":
 		var imageMessagePayload ImageMessagePayload
 		_ = json.Unmarshal(decodeBytes, &imageMessagePayload)
-		log.Println("attachment_id:  ", imageMessagePayload.AttachmentId)
 		att, err := bot.AttachmentShow(durable.Ctx, clientId, sessionId, privateKey, imageMessagePayload.AttachmentId)
 		if err != nil {
 			return

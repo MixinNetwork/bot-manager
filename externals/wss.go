@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/base64"
 	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/astaxie/beego"
 	"github.com/liuzemei/bot-manager/durable"
 	"github.com/liuzemei/bot-manager/models"
 	"github.com/liuzemei/bot-manager/utils"
 	"log"
 	"strings"
+	"time"
 )
 
 type listener struct {
@@ -75,6 +77,7 @@ func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 				return nil
 			}
 		}
+		time.Sleep(time.Second * 15)
 	}
 }
 
@@ -86,20 +89,20 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 		}
 	} else {
 		currentMessage := make([]*bot.MessageRequest, 0)
-		overMessage := make([]*bot.MessageRequest, 0)
+		overMessage := messages
 		for {
 			if len(overMessage) > 100 {
 				currentMessage = overMessage[:100]
 				err := bot.PostMessages(durable.Ctx, currentMessage, clientId, sessionId, privateKey)
 				if err != nil {
-					log.Println(err)
+					log.Println("SendBatchMessage", err)
 					continue
 				}
 				overMessage = overMessage[100:]
 			} else {
 				err := bot.PostMessages(durable.Ctx, currentMessage, clientId, sessionId, privateKey)
 				if err != nil {
-					log.Println(err)
+					log.Println("SendBatchMessage2", err)
 					continue
 				}
 				break
@@ -110,5 +113,8 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 }
 
 func init() {
-	bot.SetBlazeUri("blaze.mixin.one")
+	runmode := beego.AppConfig.String("runmode")
+	if runmode == "prod" {
+		bot.SetBlazeUri("blaze.mixin.one")
+	}
 }
