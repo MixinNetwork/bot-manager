@@ -96,12 +96,10 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 			return err
 		}
 	} else {
-		currentMessage := make([]*bot.MessageRequest, 0)
 		overMessage := messages
 		for {
 			if len(overMessage) > 100 {
-				currentMessage = overMessage[:100]
-				err := bot.PostMessages(durable.Ctx, currentMessage, clientId, sessionId, privateKey)
+				err := bot.PostMessages(durable.Ctx, overMessage[:100], clientId, sessionId, privateKey)
 				if err != nil {
 					log.Println("SendBatchMessage", err)
 					continue
