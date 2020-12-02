@@ -185,6 +185,7 @@ func GetBotByHash(hashList []string) []UserBase {
 
 func DeleteBotItem(clientId string) {
 	db.Conn.Delete(Bot{}, "client_id=?", clientId)
+	db.Conn.Delete(UserBot{}, "client_id=?", clientId)
 }
 
 func Sha256Hash(clientId, sessionId, privateKey string) string {

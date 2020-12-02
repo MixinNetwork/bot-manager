@@ -105,7 +105,7 @@ func (c *UserController) Login() {
 	c.ServeJSON()
 }
 
-func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBase, error) {
+func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBaseResp, error) {
 	botUser := models.GetBotUser(userId, clientId)
 	if botUser.IdentityNumber == "" {
 		usersUser := models.GetUserById(userId)
@@ -141,9 +141,10 @@ func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBase, error)
 			}, clientId)
 		}
 	}
-	return &models.UserBase{
+	return &models.UserBaseResp{
 		FullName:       botUser.FullName,
 		IdentityNumber: botUser.IdentityNumber,
 		AvatarURL:      botUser.AvatarURL,
+		UserId:         userId,
 	}, nil
 }

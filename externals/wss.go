@@ -3,14 +3,15 @@ package externals
 import (
 	"context"
 	"encoding/base64"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/astaxie/beego"
 	"github.com/liuzemei/bot-manager/durable"
 	"github.com/liuzemei/bot-manager/models"
 	"github.com/liuzemei/bot-manager/utils"
-	"log"
-	"strings"
-	"time"
 )
 
 type listener struct {
@@ -22,7 +23,9 @@ type listener struct {
 }
 
 var ignoreCategory = map[string]bool{
-	"SYSTEM_CONVERSATION": true,
+	"SYSTEM_CONVERSATION":     true,
+	"SYSTEM_ACCOUNT_SNAPSHOT": true,
+	"MESSAGE_RECALL":          true,
 }
 
 func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId string) error {
@@ -54,6 +57,8 @@ func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId str
 	return nil
 }
 
+var ReconnectTimes = map[string]int{}
+
 func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 	for {
 		client := bot.NewBlazeClient(clientId, sessionId, privateKey)
@@ -68,13 +73,16 @@ func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 			if err.Error() == "websocket: bad handshake" {
 				log.Println("StartWebSockets Err", err)
 			} else if err.Error() == `{"status":500,"code":7000,"description":"Blaze server error."}` {
-				log.Println(clientId)
-				log.Println("Blaze server error")
+				if ReconnectTimes[clientId] >= 10 {
+					return err
+				}
+				ReconnectTimes[clientId]++
+				log.Println("Blaze server error", clientId, ReconnectTimes[clientId])
 			} else if strings.Contains(err.Error(), "operation timed out") {
 				log.Println("Blaze timed out")
 			} else {
 				log.Println("密码不对？", err.Error())
-				return nil
+				return err
 			}
 		}
 		time.Sleep(time.Second * 15)
@@ -100,7 +108,7 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 				}
 				overMessage = overMessage[100:]
 			} else {
-				err := bot.PostMessages(durable.Ctx, currentMessage, clientId, sessionId, privateKey)
+				err := bot.PostMessages(durable.Ctx, overMessage, clientId, sessionId, privateKey)
 				if err != nil {
 					log.Println("SendBatchMessage2", err)
 					continue
@@ -108,6 +116,16 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 				break
 			}
 		}
+	}
+	return nil
+}
+
+func SendText(botInfo *models.Bot, userId, text string) error {
+	conversationId := bot.UniqueConversationId(botInfo.ClientId, userId)
+	data := base64.StdEncoding.EncodeToString([]byte(text))
+	err := bot.PostMessage(durable.Ctx, conversationId, userId, bot.UuidNewV4().String(), "PLAIN_TEXT", data, botInfo.ClientId, botInfo.SessionId, botInfo.PrivateKey)
+	if err != nil {
+		return err
 	}
 	return nil
 }

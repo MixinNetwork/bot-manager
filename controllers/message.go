@@ -106,13 +106,20 @@ func (c *MessageController) PostBroadcast() {
 		session.HandleError(c.Ctx, err)
 		return
 	}
+	// 1. 先返回结果
+	c.Data["json"] = Resp{Data: "ok"}
+	c.ServeJSON()
 	// 2. 构建一个原始消息
 	originMessageId := bot.UuidNewV4().String()
 	// 3. 构建广播消息 并发送
 	sendMessages, err := sendBroadcast(clientBot, reqModel.Category, reqModel.Data, false)
 	if err != nil {
-		log.Println("PostBroadcast sendBroadcast")
-		session.HandleBadRequestError(c.Ctx)
+		log.Println("PostBroadcast sendBroadcast", err)
+		return
+	}
+	err = externals.SendText(clientBot, userId.(string), "发送完毕")
+	if err != nil {
+		log.Println("PostBroadcast sendBroadcast, 2", err)
 		return
 	}
 	models.AddBroadcast(clientBot.ClientId, userId.(string), originMessageId, reqModel.Category, reqModel.Data)
@@ -120,8 +127,6 @@ func (c *MessageController) PostBroadcast() {
 	for _, message := range sendMessages {
 		models.AddBroadcastTmpMessage(reqModel.ClientId, message.MessageId, originMessageId, message.RecipientId, message.ConversationId)
 	}
-	c.Data["json"] = Resp{Data: "ok"}
-	c.ServeJSON()
 }
 func (c *MessageController) DeleteBroadcast() {
 	userId := c.Ctx.Input.GetData("UserId")

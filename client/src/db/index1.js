@@ -106,6 +106,7 @@ function resolveData(req, fn) {
     }
     req.onerror = e => {
       state = true
+      _vm.$message(_vm.$t('error.chrome'))
       reject(e)
     }
     setTimeout(() => {

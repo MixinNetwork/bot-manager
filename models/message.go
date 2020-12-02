@@ -104,6 +104,20 @@ type RespReplayMessage struct {
 	Key       string `json:"key"`
 	CreatedAt string `json:"created_at"`
 }
+type ForwardMessagePropsType struct {
+	Category         string `json:"category"`
+	CreatedAt        string `json:"created_at"`
+	MessageId        string `json:"message_id"`
+	Source           string `json:"source"`
+	UserId           string `json:"user_id"`
+	QuoteMessageId   string `json:"quote_message_id"`
+	AdminId          string `json:"admin_id"`
+	ConversationId   string `json:"conversation_id"`
+	Data             string `json:"data"`
+	RepresentativeId string `json:"representative_id"`
+	Status           string `json:"status"`
+	UpdatedAt        string `json:"updated_at"`
+}
 
 func init() {
 	db.RegisterMigration(`CREATE TABLE IF NOT EXISTS forward_messages (
@@ -199,25 +213,6 @@ func GetLastMessageByRecipientId(clientId, recipientId string) *ForwardMessage {
 	return &msg
 }
 
-func GetMessagesByOriginId(messageId string) *RespMessage {
-	var message *RespMessage
-	db.Conn.Raw("SELECT message_id, recipient_id, conversation_id, admin_id FROM message WHERE origin_message_id=?", messageId).Scan(message)
-	return message
-}
-
-func transferForwardMessageData(messages []ForwardMessage) []RespForwardMessage {
-	var resp []RespForwardMessage
-	for _, message := range messages {
-		resp = append(resp, RespForwardMessage{
-			ClientId:        message.ClientId,
-			MessageId:       message.MessageId,
-			AdminId:         message.AdminId,
-			RecipientId:     message.RecipientId,
-			OriginMessageId: message.OriginMessageId,
-			ConversationId:  message.ConversationId,
-			AdminMessageId:  message.AdminMessageId,
-			CreatedAt:       message.CreatedAt,
-		})
-	}
-	return resp
+func UpdateClientMessageById(clientId string, user *UserBaseResp, msg *ForwardMessagePropsType, status string) {
+	db.Conn.Exec(`UPDATE messages SET user_id=$3, status=$4 WHERE client_id=$1 AND message_id=$2`, clientId, msg.MessageId, user.UserId, status)
 }

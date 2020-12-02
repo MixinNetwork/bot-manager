@@ -4,8 +4,8 @@ class Donate extends DB {
   constructor(props) {
     super(props);
     if (!this.db.objectStoreNames.contains('messages')) {
-      this.MessageStore = this.db.createObjectStore('messages', { keyPath: 'message_id' })
-      this.MessageStore.createIndex("created_at", "created_at", { unique: true });
+      this.MessageStore = this.db.createObjectStore('messages', {keyPath: 'message_id'})
+      this.MessageStore.createIndex("created_at", "created_at", {unique: true});
     } else {
       this.MessageStore = this.db.transaction('messages', 'readwrite')
     }
@@ -23,7 +23,7 @@ class Donate extends DB {
 
   async getLastMessage() {
     let sql = `SELECT created_at FROM messages order by created_at desc limit 1`
-    let { created_at } = (await this.query(sql))[0] || {}
+    let {created_at} = (await this.query(sql))[0] || {}
     return created_at
   }
 

@@ -3,6 +3,11 @@ package controllers
 import (
 	"encoding/base64"
 	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
@@ -12,10 +17,6 @@ import (
 	"github.com/liuzemei/bot-manager/models"
 	"github.com/liuzemei/bot-manager/session"
 	"github.com/liuzemei/bot-manager/utils"
-	"io"
-	"log"
-	"net/http"
-	"strings"
 )
 
 func connectBot(botInfo models.UserBot) {
@@ -28,8 +29,11 @@ func connectBot(botInfo models.UserBot) {
 	go readMessage(messageTransfer, botInfo.Hash)
 	err := externals.StartWebSockets(botInfo.ClientId, botInfo.SessionId, botInfo.PrivateKey, botInfo.Hash)
 	if err != nil {
-		close(models.HashMessengerMap[botInfo.Hash])
-		delete(models.HashMessengerMap, botInfo.Hash)
+		models.DeleteBotItem(botInfo.ClientId)
+		if models.HashMessengerMap[botInfo.Hash] != nil {
+			close(models.HashMessengerMap[botInfo.Hash])
+			delete(models.HashMessengerMap, botInfo.Hash)
+		}
 	}
 }
 
@@ -179,7 +183,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		// 2. 转发给其他管理员的 messenger。
 		data := resp.Data
 		adminIds := models.GetAdminIdsByBotId(botInfo.ClientId)
-		forwardDashboardMessage(&forwardMessagePropsType{
+		forwardDashboardMessage(&models.ForwardMessagePropsType{
 			Category:         data.Category,
 			CreatedAt:        utils.FormatTime(data.CreatedAt),
 			MessageId:        data.MessageId,
@@ -198,22 +202,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 	return nil
 }
 
-type forwardMessagePropsType struct {
-	Category         string `json:"category"`
-	CreatedAt        string `json:"created_at"`
-	MessageId        string `json:"message_id"`
-	Source           string `json:"source"`
-	UserId           string `json:"user_id"`
-	QuoteMessageId   string `json:"quote_message_id"`
-	AdminId          string `json:"admin_id"`
-	ConversationId   string `json:"conversation_id"`
-	Data             string `json:"data"`
-	RepresentativeId string `json:"representative_id"`
-	Status           string `json:"status"`
-	UpdatedAt        string `json:"updated_at"`
-}
-
-func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, privateKey, hash string, isAdmin bool, adminIds []string) {
+func forwardDashboardMessage(msg *models.ForwardMessagePropsType, clientId, sessionId, privateKey, hash string, isAdmin bool, adminIds []string) {
 	if msg.UserId == "" {
 		return
 	}
@@ -274,6 +263,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 			log.Println("/controllers/wss forwardDashboardMessage 获取originMessage失败", msg.MessageId)
 			return
 		} else {
+			GetMessageUserAutoUpdate(userId, clientId)
 			userId = originMessage.RecipientId
 		}
 		status = "read"
@@ -301,6 +291,7 @@ func forwardDashboardMessage(msg *forwardMessagePropsType, clientId, sessionId, 
 			}
 		}
 	}
+	models.UpdateClientMessageById(clientId, userInfo, msg, status)
 }
 
 type ackMessageType struct {
@@ -346,8 +337,4 @@ func writeMessage(conn io.Writer, message []byte) error {
 		return err
 	}
 	return nil
-}
-
-func getForwardParams() {
-
 }
