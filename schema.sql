@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS user_bots (
   session_id   VARCHAR(36) NOT NULL,
   private_key  VARCHAR NOT NULL,
   hash         VARCHAR NOT NULL UNIQUE,
+  is_valid     VARCHAR(1) NOT NULL DEFAULT '1',
   PRIMARY KEY(user_id, client_id)
 );
 CREATE INDEX user_bots_user_id_idx on user_bots(user_id)
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS bots (
   full_name           VARCHAR(1024) NOT NULL,
   identity_number     VARCHAR(11) NOT NULL UNIQUE,
   avatar_url          VARCHAR(1024) NOT NULL,
+  is_valid            VARCHAR(1) NOT NULL DEFAULT '1',
   hash                VARCHAR NOT NULL UNIQUE
 );
 

@@ -1,19 +1,19 @@
 <template>
   <ul>
-    <li v-for="(item,idx) in contactList" :key="idx" :class="['item']">
-      <Avatar :user_info="item" size="38"/>
+    <li v-for="item in contactList" :key="item.user_id" :class="['item']">
+      <Avatar :user_info="item" size="38" />
       <div class="message">
         <p>{{item.full_name}}</p>
         <i>{{item.messages | message}}</i>
       </div>
       <div class="date">
         <p>{{item.messages[item.messages.length-1].created_at}}</p>
-        <span v-if="item.messages[item.messages.length-1].status!=='sent'" class="ok">已回复</span>
+        <span v-if="item.messages[item.messages.length-1].status!=='sent' || ['你好', 'Hi'].includes(item.messages[item.messages.length - 1].data)" class="ok">已回复</span>
         <span v-else>未回复</span>
       </div>
       <span class="session" @click="clickSession(item)">会话</span>
     </li>
-    <MessageReply v-if="replyModal"/>
+    <MessageReply v-if="replyModal" />
   </ul>
 </template>
 
@@ -110,6 +110,7 @@
       flex-direction: column;
       align-items: center;
       margin-left: 20px;
+      min-width: 120px;
 
       p {
         font-size: 12px;

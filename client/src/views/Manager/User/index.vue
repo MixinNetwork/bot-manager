@@ -2,21 +2,21 @@
   <div class="users">
     <Tabs :current-state="currentState" :state-list="stateList" :toggle-state="toggleState" />
     <ul class="main-container">
-      <li :class="['item', currentState==='block' && 'item-block']">
+      <li class="item item-title">
         <span>名称</span>
         <span>Mixin ID</span>
         <span>加入时间</span>
-        <span v-if="currentState==='block'">屏蔽时间</span>
+        <span>{{currentState==='block' ? '屏蔽时间' : ''}}</span>
         <span class="btn">操作</span>
       </li>
-      <li v-for="user in userList" :class="['item', currentState==='block' && 'item-block']">
+      <li v-for="user in userList" :key="user.user_id" class="item">
         <div class="user-name">
           <Avatar :user_info="user" size="38" />
           <span>{{user.full_name}}</span>
         </div>
         <span class="user-number">{{user.identity_number}}</span>
         <span class="user-time">{{user.created_at}}</span>
-        <span class="user-time" v-if="currentState==='block'">{{user.block_time}}</span>
+        <span class="user-time">{{currentState==='block' ? user.block_time : ''}}</span>
         <button @click="clickBlockUser(user)">{{user.block_time ? "恢复":"操作"}}</button>
       </li>
     </ul>
@@ -81,13 +81,14 @@
 
   .item {
     display: grid;
-    grid-template-columns: 1fr 100px 120px 100px;
+    grid-template-columns: 12fr 5fr 10fr 10fr 7fr;
+    grid-column-gap: 26px;
     align-items: center;
     text-align: center;
     height: 80px;
     position: relative;
     background-color: #F8F9FE;
-    padding: 0 32px;
+    padding: 0 26px;
 
     transition: all .1s;
     border-radius: 4px;
@@ -104,6 +105,11 @@
         background: #4C4471;
         color: #fff;
       }
+    }
+    &-title {
+      font-size: 14px;
+
+      color: #B1B4CF;
     }
 
     img {
@@ -172,18 +178,14 @@
     }
   }
 
-  .item-block {
-    grid-template-columns: 1fr 100px 140px 140px 100px;
-  }
-
   .user-name {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 2px 0 10px;
     font-weight: 500;
     font-size: 16px;
     overflow: hidden;
+    padding: 0 30px;
 
     .avatar {
       min-width: 38px;

@@ -25,11 +25,9 @@ export default {
     },
     async getUserList(ctx, status) {
       let currentClientID = ctx.rootState.user.active_bot.client_id
-      while (true) {
+      while (!currentClientID) {
         await tools.delay(0.1)
-        if (!currentClientID) {
-          currentClientID = ctx.rootState.user.active_bot.client_id
-        } else break
+        currentClientID = ctx.rootState.user.active_bot.client_id
       }
       const userList = await api.getUser(currentClientID, status)
       ctx.commit('changeState', { userList })

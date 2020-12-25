@@ -54,8 +54,6 @@ export default {
       commit('changeState', { active_bot: item })
       ctx.dispatch('message/toggleBotMessage', item, { root: true })
       ctx.dispatch('data/toggleStatistics', item, { root: true })
-      set('bot', item.client_id)
-      if (item.is_reload) window.location.href = '/'
     },
     async getBotFavorite(ctx) {
       let currentClientID = ctx.state.active_bot.client_id

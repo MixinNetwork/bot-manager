@@ -46,7 +46,9 @@ class WSSClient {
   async initMessage() {
     this.initState = true
     let created_at = new Date(this.initTime).toISOString()
-    this.ws.send(JSON.stringify({ created_at }))
+    const client_id = localStorage.getItem('add_bot')
+    this.ws.send(JSON.stringify({ created_at, client_id }))
+    localStorage.removeItem('add_bot')
   }
 
   async handleMessage(message) {

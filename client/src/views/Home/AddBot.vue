@@ -49,8 +49,9 @@
         if (client_id === this.form.client_id) {
           this.$message("添加成功")
           this.$DC('user', { show_add_bot: false })
+          this.$ls.set('bot', client_id)
+          this.$ls.set('add_bot', client_id)
           setTimeout(() => {
-            this.$ls.set('bot', client_id)
             window.location.reload()
           }, 500)
         }

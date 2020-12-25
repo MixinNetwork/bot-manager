@@ -73,14 +73,13 @@
 
 <style lang="scss" scoped>
 
-  .item-list {
-  }
-
   .item {
     display: grid;
-    grid-template-columns: 3fr 1fr 200px 80px 160px;
+    grid-template-columns: 14fr 5fr 9fr 4fr 8fr;
+    grid-column-gap: 26px;
     text-align: center;
     align-items: center;
+    padding: 26px;
     height: 80px;
     position: relative;
     background-color: #F8F9FE;
@@ -101,7 +100,7 @@
     }
 
     .btn {
-      margin: 0 10px;
+      margin: 0 auto;
       width: 130px;
 
       button {

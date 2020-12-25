@@ -182,6 +182,29 @@ func GetAllMessagesByUserId(userId string, date string) []RespMessage {
 	return resp
 }
 
+func GetAllMessagesByBotId(clientId string) []RespMessage {
+	var msgs []RespDbMessage
+	db.Conn.Table("messages").Select("users.identity_number, users.full_name, users.avatar_url, messages.*").Joins("left join users on messages.user_id=users.user_id").Where("client_id=?", clientId).Order("created_at ASC").Find(&msgs)
+	var resp []RespMessage
+	for _, msg := range msgs {
+		resp = append(resp, RespMessage{
+			ClientId:       msg.ClientId,
+			UserId:         msg.UserId,
+			IdentityNumber: msg.IdentityNumber,
+			FullName:       msg.FullName,
+			AvatarURL:      msg.AvatarURL,
+			ConversationID: msg.ConversationId,
+			MessageId:      msg.MessageId,
+			Category:       msg.Category,
+			Data:           msg.Data,
+			Status:         msg.Status,
+			Source:         msg.Source,
+			CreatedAt:      msg.CreatedAt,
+		})
+	}
+	return resp
+}
+
 func GetOriginMessageById(clientId, messageId string) *ForwardMessage {
 	var msg ForwardMessage
 	db.Conn.Select("message_id, conversation_id, origin_message_id, recipient_id").Where("client_id=? AND message_id=?", clientId, messageId).First(&msg)

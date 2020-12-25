@@ -182,8 +182,8 @@ func (c *MessageController) UploadFile() {
 
 func ConnectAllBot() {
 	bots := models.GetAllBot()
-	for _, bot := range bots {
-		go connectBot(bot)
+	for _, userBot := range bots {
+		go connectBot(userBot)
 	}
 }
 

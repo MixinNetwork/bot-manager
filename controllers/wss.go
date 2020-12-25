@@ -116,8 +116,31 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		log.Println("/controllers/wss handleUserMessage", err)
 	}
 	if message.CreatedAt != "" {
+		var messages []models.RespMessage
 		// 发送了 初始化的消息
-		messages := models.GetAllMessagesByUserId(userId, message.CreatedAt)
+		if message.ClientId != "" {
+			messagesClient := models.GetAllMessagesByBotId(message.ClientId)
+			if messagesClient != nil {
+				messages = messagesClient
+			}
+		}
+		messagesDate := models.GetAllMessagesByUserId(userId, message.CreatedAt)
+		if messagesDate != nil {
+			if messages == nil {
+				messages = messagesDate
+			} else {
+				messageIdMap := map[string]bool{}
+				for _, respMessage := range messages {
+					messageIdMap[respMessage.MessageId] = true
+				}
+				for _, respMessage := range messagesDate {
+					if !messageIdMap[respMessage.MessageId] {
+						messages = append(messages, respMessage)
+					}
+				}
+			}
+		}
+
 		if messages != nil {
 			byteMsg, _ := json.Marshal(messages)
 			if err := writeMessage(conn, byteMsg); err != nil {

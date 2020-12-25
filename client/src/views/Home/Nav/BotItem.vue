@@ -19,7 +19,7 @@
 
 
 <script>
-  import { mapActions } from 'vuex'
+  import { mapActions, mapState } from 'vuex'
   import Avatar from "../../../components/Avatar"
 
   export default {
@@ -41,12 +41,18 @@
         default: false
       }
     },
+    computed: {
+      ...mapState('user', ['active_bot'])
+    },
     methods: {
       ...mapActions('user', ['changeActiveBot']),
       clickBotItem() {
         if (!this.isHead && !this.isAdd) {
-          this.changeActiveBot({ ...this.botItem, is_reload: true })
+          const { client_id } = this.botItem
           this.$emit('toggleList')
+          if (client_id === this.active_bot.client_id) return
+          this.$ls.set('bot', client_id)
+          window.location.reload()
         }
         if (this.isHead) this.$emit('toggleList')
         if (this.isAdd) {

@@ -81,7 +81,9 @@
 <style lang="scss" scoped>
 
   .item {
-    display: flex;
+    display: grid;
+    grid-template-columns: 192fr 136fr 300fr 280fr;
+    grid-column-gap: 26px;
     align-items: center;
     height: 80px;
     position: relative;
@@ -134,7 +136,7 @@
   }
 
   .btn {
-    margin: 0 10px;
+    margin: 0 auto;
     width: 216px;
     display: flex;
     justify-content: center;

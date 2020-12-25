@@ -183,11 +183,14 @@ export default {
     }
   }
 }
+const messageIdMaps = {}
 
 function handleMessage(originMessage, ctx, initStatus) {
   const target = initStatus ? [] : ctx.state.contactList
   for (let i = 0, len = originMessage.length; i < len; i++) {
     let messageItem = originMessage[i]
+    if (messageIdMaps[messageItem.message_id]) continue
+    messageIdMaps[messageItem.message_id] = true
     if (currentClientID !== messageItem.client_id) continue
     let { idx, obj } = findIndexOrObj(messageItem, target)
     if (idx === -1) target.unshift(obj)
@@ -237,9 +240,22 @@ async function findMessageAndUpdate({ message_id, status }, contactList) {
 
 function formatDate(date) {
   date = new Date(date)
-  let hours = date.getHours(),
-    minutes = date.getMinutes()
-  hours < 10 && (hours = '0' + hours)
-  minutes < 10 && (minutes = '0' + minutes)
-  return `${hours}:${minutes}`
+  const now = new Date()
+  const hours = autoAddZero(date.getHours()),
+    minutes = autoAddZero(date.getMinutes())
+  let time = `${hours}:${minutes}`
+  if (now - date > 24 * 3600 * 1000) {
+    const year = date.getFullYear(),
+      month = autoAddZero(date.getMonth() + 1),
+      day = autoAddZero(date.getDate())
+    time = `${year}-${month}-${day} ${time}`
+    if (now.getFullYear() !== year) {
+      time = `${year}-${time}`
+    }
+  }
+  return time
+}
+
+function autoAddZero(num) {
+  return Number(num) < 10 ? `0${num}` : num
 }

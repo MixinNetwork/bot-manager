@@ -20,7 +20,7 @@
             <template v-if="item.category === 'PLAIN_TEXT'">
               <div class="message-item">
                 <span> {{item.data}}</span>
-                <span class="time-holder">{{item.created_at}}
+                <span class="time-holder">{{item.created_at.slice(-5)}}
                   <i v-if="item.status === 'pending'" :class="`iconfont ${item.status}`">&#xe63a;</i>
                   <i v-else-if="item.status !== 'sent'" :class="`iconfont ${item.status}`">&#xe63b;</i>
                 </span>
@@ -30,7 +30,7 @@
             <template v-else-if="item.category === 'PLAIN_IMAGE'">
               <div class="img-item">
                 <img @load="messageContainerToBottom" :src="item.data" />
-                <span class="time-holder">{{item.created_at}}
+                <span class="time-holder">{{item.created_at.slice(-5)}}
                   <i v-if="item.status === 'pending'" :class="`iconfont ${item.status}`">&#xe63a;</i>
                   <i v-else-if="item.status !== 'sent'" :class="`iconfont ${item.status}`">&#xe63b;</i>
                 </span>

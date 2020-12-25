@@ -117,7 +117,7 @@ func GetUserBotHashByUserId(userId string) []string {
 
 func GetUserBotByUserId(userId string) []*BotInfoRes {
 	var bots []Bot
-	db.Conn.Raw("SELECT bots.client_id, bots.full_name, bots.identity_number, bots.avatar_url FROM user_bots LEFT JOIN bots ON user_bots.client_id=bots.client_id WHERE user_id=$1", userId).Scan(&bots)
+	db.Conn.Raw("SELECT bots.client_id, bots.full_name, bots.identity_number, bots.avatar_url FROM user_bots LEFT JOIN bots ON user_bots.client_id=bots.client_id WHERE user_id=$1 AND bots.is_valid='1'", userId).Scan(&bots)
 	respBots := make([]*BotInfoRes, 0)
 	for _, bot := range bots {
 		respBots = append(respBots, &BotInfoRes{
@@ -184,8 +184,8 @@ func GetBotByHash(hashList []string) []UserBase {
 }
 
 func DeleteBotItem(clientId string) {
-	db.Conn.Delete(Bot{}, "client_id=?", clientId)
-	db.Conn.Delete(UserBot{}, "client_id=?", clientId)
+	db.Conn.Table("bots").Where("client_id=?", clientId).Update("is_valid", "0")
+	db.Conn.Table("user_bots").Where("client_id=?", clientId).Update("is_valid", "0")
 }
 
 func Sha256Hash(clientId, sessionId, privateKey string) string {
