@@ -9,3 +9,7 @@ dist
 *.sh
 *.gz
 .vscode
+
+app.conf
+
+.env.production

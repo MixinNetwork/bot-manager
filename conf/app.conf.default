@@ -1,0 +1,32 @@
+appname = bot-manager
+httpport = 9098
+runmode = dev
+autorender = false
+copyrequestbody = true
+
+[dev]
+dbHost=localhost
+dbUser=
+dbName=
+dbPass=
+
+clientId=
+clientSecret=
+sessionId=
+privateKey=
+
+claimKey=dev
+
+
+[prod]
+dbHost=
+dbUser=
+dbName=
+dbPass=
+
+clientId=
+clientSecret=
+sessionId=
+privateKey=
+
+claimKey=prod
