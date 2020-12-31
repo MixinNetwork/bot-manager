@@ -11,5 +11,5 @@ dist
 .vscode
 .idea
 app.conf
-
+scripts
 .env.production
