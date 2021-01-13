@@ -33,7 +33,6 @@
           return this.$store.state.message.activeContent
         },
         set(activeContent) {
-          console.log(activeContent)
           this.$DC('message', { activeContent })
         }
       }

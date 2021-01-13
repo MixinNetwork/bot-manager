@@ -51,7 +51,13 @@
     methods: {
       ...mapActions(['getMessageReplayList', 'clickAddReplay']),
       clickAddRepay() {
-        this.$DC('message', { keyModalType: "edit", keyModal: true })
+        this.$DC('message', {
+          keyModalType: "edit",
+          keyModal: true,
+          activeContent: "",
+          activeKey: "",
+          activeType: 'PLAIN_TEXT' }
+        )
       },
       clickAddBroadcast() {
         this.$DC('message', { broadcastModalType: "send", broadcastModal: true })

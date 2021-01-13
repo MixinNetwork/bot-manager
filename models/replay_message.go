@@ -34,7 +34,7 @@ func AddOrUpdateAutoReplayMessage(replayId, key, clientId, category, data string
 			CreatedAt: utils.FormatTime(time.Now()),
 		})
 	} else {
-		db.Conn.Model(&autoReplayMessage).Update(map[string]interface{}{"data": data, "category": category})
+		db.Conn.Model(&autoReplayMessage).Where("client_id=? AND replay_id=?", clientId, replayId).Update(map[string]interface{}{"data": data, "category": category})
 	}
 }
 
