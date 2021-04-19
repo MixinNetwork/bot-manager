@@ -248,7 +248,7 @@ function formatDate(date) {
     const year = date.getFullYear(),
       month = autoAddZero(date.getMonth() + 1),
       day = autoAddZero(date.getDate())
-    time = `${year}-${month}-${day} ${time}`
+    time = `${month}-${day} ${time}`
     if (now.getFullYear() !== year) {
       time = `${year}-${time}`
     }

@@ -56,7 +56,9 @@
           keyModal: true,
           activeContent: "",
           activeKey: "",
-          activeType: 'PLAIN_TEXT' }
+          activeType: 'PLAIN_TEXT',
+          activeReplayId: "",
+          }
         )
       },
       clickAddBroadcast() {

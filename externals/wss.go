@@ -32,9 +32,16 @@ func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId str
 	if ignoreCategory[msg.Category] {
 		return nil
 	}
+	// 黑名单用户
 	if models.CheckUserStatus(l.ClientId, msg.UserId) {
 		return nil
 	}
+
+	// 小群消息
+	if bot.UniqueConversationId(l.ClientId, msg.UserId) != msg.ConversationId {
+		return nil
+	}
+
 	data, _ := base64.StdEncoding.DecodeString(msg.Data)
 	models.AddMessage(models.Message{
 		ClientId:       l.ClientId,
@@ -57,8 +64,6 @@ func (l listener) OnMessage(ctx context.Context, msg bot.MessageView, userId str
 	return nil
 }
 
-var ReconnectTimes = map[string]int{}
-
 func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 	for {
 		client := bot.NewBlazeClient(clientId, sessionId, privateKey)
@@ -70,19 +75,11 @@ func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 		}
 		err := client.Loop(durable.Ctx, _listener)
 		if err != nil {
-			if err.Error() == "websocket: bad handshake" {
-				log.Println("StartWebSockets Err", err)
-			} else if err.Error() == `{"status":500,"code":7000,"description":"Blaze server error."}` {
-				if ReconnectTimes[clientId] >= 10 {
+			if err.Error() == `{"status":500,"code":7000,"description":"Blaze server error."}` {
+				_, err := bot.GetUser(durable.Ctx, clientId, clientId, sessionId, privateKey)
+				if err != nil && strings.Contains(err.Error(), "401") {
 					return err
 				}
-				ReconnectTimes[clientId]++
-				log.Println("Blaze server error", clientId, ReconnectTimes[clientId])
-			} else if strings.Contains(err.Error(), "operation timed out") {
-				log.Println("Blaze timed out")
-			} else {
-				log.Println("密码不对？", err.Error())
-				return err
 			}
 		}
 		time.Sleep(time.Second * 15)
