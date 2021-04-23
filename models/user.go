@@ -8,25 +8,12 @@ import (
 )
 
 type User struct {
-	UserId         string `gorm:"column:user_id"`
-	FullName       string `gorm:"column:full_name"`
-	IdentityNumber string `gorm:"column:identity_number"`
-	AvatarURL      string `gorm:"column:avatar_url"`
-	AccessToken    string `gorm:"column:access_token"`
-	CreatedAt      string `gorm:"column:created_at"`
-}
-
-type UserBase struct {
-	FullName       string `gorm:"column:full_name"`
-	IdentityNumber string `gorm:"column:identity_number"`
-	AvatarURL      string `gorm:"column:avatar_url"`
-}
-
-type UserBaseResp struct {
-	FullName       string `json:"full_name"`
-	IdentityNumber string `json:"identity_number"`
-	AvatarURL      string `json:"avatar_url"`
-	UserId         string `json:"user_id"`
+	UserId         string `gorm:"column:user_id" json:"user_id,omitempty"`
+	FullName       string `gorm:"column:full_name" json:"full_name,omitempty"`
+	IdentityNumber string `gorm:"column:identity_number" json:"identity_number,omitempty"`
+	AvatarURL      string `gorm:"column:avatar_url" json:"avatar_url,omitempty"`
+	AccessToken    string `gorm:"column:access_token" json:"access_token,omitempty"`
+	CreatedAt      string `gorm:"column:created_at" json:"created_at,omitempty"`
 }
 
 type BotUser struct {
@@ -109,40 +96,22 @@ func GetTodayUserCount(clientId string) (count int) {
 	return
 }
 
-func GetUserById(userId string) *UserBaseResp {
+func GetUserById(userId string) *User {
 	var userInfo User
 	db.Conn.First(&userInfo, "user_id=?", userId)
-	return &UserBaseResp{
-		FullName:       userInfo.FullName,
-		IdentityNumber: userInfo.IdentityNumber,
-		AvatarURL:      userInfo.AvatarURL,
-		UserId:         userInfo.UserId,
-	}
+	return &userInfo
 }
 
-func GetUserByIds(userIds []string) []*UserBaseResp {
+func GetUserByIds(userIds []string) []*User {
 	userInfos := make([]*User, 0)
 	db.Conn.Find(&userInfos, "user_id in (?)", userIds)
-	resp := make([]*UserBaseResp, 0)
-	for _, info := range userInfos {
-		resp = append(resp, &UserBaseResp{
-			FullName:       info.FullName,
-			IdentityNumber: info.IdentityNumber,
-			AvatarURL:      info.AvatarURL,
-			UserId:         info.UserId,
-		})
-	}
-	return resp
+	return userInfos
 }
 
-func GetBotUser(userId, clientId string) *UserBaseResp {
-	var botUser UserBase
+func GetBotUser(userId, clientId string) *User {
+	var botUser User
 	db.Conn.Raw("select users.identity_number, users.avatar_url, users.full_name from bot_users left join users on bot_users.user_id=users.user_id where bot_users.user_id=? AND bot_users.client_id=?", userId, clientId).Scan(&botUser)
-	return &UserBaseResp{
-		FullName:       botUser.FullName,
-		IdentityNumber: botUser.IdentityNumber,
-		AvatarURL:      botUser.AvatarURL,
-	}
+	return &botUser
 }
 
 type UserIdType struct {

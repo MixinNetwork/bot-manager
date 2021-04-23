@@ -19,11 +19,11 @@ func readMessage(messageCome <-chan models.MessengerChannel, hash string) {
 			models.UpdateMessage(_msg.MessageId, _msg.Status)
 			for _, chanel := range models.HashManagerMap[hash] {
 				if chanel != nil {
-					chanel <- models.RespMessage{
-						MessageId: _msg.MessageId,
-						Status:    _msg.Status,
-						Source:    _msg.Source,
-					}
+					var m models.RespMessage
+					m.MessageId = _msg.MessageId
+					m.Status = _msg.Status
+					m.Source = _msg.Source
+					chanel <- m
 				}
 			}
 			continue

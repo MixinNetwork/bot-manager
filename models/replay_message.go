@@ -6,8 +6,16 @@ import (
 	"time"
 )
 
-func init() {
+type AutoReplayMessage struct {
+	ReplayId  string `gorm:"column:replay_id;type:varchar(36);" json:"replay_id,omitempty"`
+	ClientId  string `gorm:"column:client_id" json:"client_id,omitempty"`
+	Category  string `gorm:"column:category" json:"category,omitempty"`
+	Data      string `gorm:"column:data" json:"data,omitempty"`
+	Key       string `gorm:"column:key" json:"key,omitempty"`
+	CreatedAt string `gorm:"column:created_at" json:"created_at,omitempty"`
+}
 
+func init() {
 	db.RegisterMigration(`CREATE TABLE IF NOT EXISTS auto_replay_messages(
   replay_id     VARCHAR(36) NOT NULL,
   client_id     VARCHAR(36) NOT NULL,
@@ -38,21 +46,10 @@ func AddOrUpdateAutoReplayMessage(replayId, key, clientId, category, data string
 	}
 }
 
-func GetAutoReplayMessage(clientId string) []*RespReplayMessage {
+func GetAutoReplayMessage(clientId string) []*AutoReplayMessage {
 	var autoReplayMessages []*AutoReplayMessage
 	db.Conn.Order("created_at ASC").Find(&autoReplayMessages, "client_id=?", clientId)
-	resp := make([]*RespReplayMessage, 0)
-	for _, message := range autoReplayMessages {
-		resp = append(resp, &RespReplayMessage{
-			ReplayId:  message.ReplayId,
-			ClientId:  message.ClientId,
-			Category:  message.Category,
-			Data:      message.Data,
-			Key:       message.Key,
-			CreatedAt: message.CreatedAt,
-		})
-	}
-	return resp
+	return autoReplayMessages
 }
 func DeleteAutoReplayMessage(replayId string) {
 	db.Conn.Delete(&AutoReplayMessage{}, "replay_id=?", replayId)

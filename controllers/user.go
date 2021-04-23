@@ -62,14 +62,6 @@ func (c *UserController) Put() {
 	c.ServeJSON()
 }
 
-type LoginRespData struct {
-	AccessToken    string `json:"access_token"`
-	AvatarUrl      string `json:"avatar_url"`
-	FullName       string `json:"full_name"`
-	UserId         string `json:"user_id"`
-	IdentityNumber string `json:"identity_number"`
-}
-
 func (c *UserController) Login() {
 	code := c.GetString("code")
 	user, token, err := externals.GetUserByCode(code)
@@ -92,9 +84,9 @@ func (c *UserController) Login() {
 	authToken, _ := middleware.Claims(user.UserId)
 
 	var resp = Resp{
-		Data: LoginRespData{
+		Data: models.User{
 			AccessToken:    authToken,
-			AvatarUrl:      user.AvatarURL,
+			AvatarURL:      user.AvatarURL,
 			FullName:       user.FullName,
 			UserId:         user.UserId,
 			IdentityNumber: user.IdentityNumber,
@@ -105,7 +97,7 @@ func (c *UserController) Login() {
 	c.ServeJSON()
 }
 
-func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBaseResp, error) {
+func GetMessageUserAutoUpdate(userId, clientId string) (*models.User, error) {
 	botUser := models.GetBotUser(userId, clientId)
 	if botUser.IdentityNumber == "" {
 		usersUser := models.GetUserById(userId)
@@ -141,7 +133,7 @@ func GetMessageUserAutoUpdate(userId, clientId string) (*models.UserBaseResp, er
 			}, clientId)
 		}
 	}
-	return &models.UserBaseResp{
+	return &models.User{
 		FullName:       botUser.FullName,
 		IdentityNumber: botUser.IdentityNumber,
 		AvatarURL:      botUser.AvatarURL,

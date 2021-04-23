@@ -16,13 +16,7 @@ type BotController struct {
 	beego.Controller
 }
 
-type addBotReq struct {
-	ClientId   string `json:"client_id"`
-	SessionId  string `json:"session_id"`
-	PrivateKey string `json:"private_key"`
-}
-
-type favorateApp struct {
+type favoriteApp struct {
 	Type      string `json:"type"`
 	UserId    string `json:"user_id"`
 	AppId     string `json:"app_id"`
@@ -36,7 +30,7 @@ func (c *BotController) Add() {
 	userId := c.Ctx.Input.GetData("UserId").(string)
 	body := c.Ctx.Input.RequestBody
 
-	var bot addBotReq
+	var bot models.UserBot
 	if err := json.Unmarshal(body, &bot); err != nil {
 		session.HandleBadRequestError(c.Ctx)
 		return
@@ -66,7 +60,7 @@ func (c *BotController) Add() {
 		Hash:       models.Sha256Hash(bot.ClientId, bot.SessionId, bot.PrivateKey),
 	})
 
-	c.Data["json"] = Resp{Data: models.BotInfoRes{
+	c.Data["json"] = Resp{Data: models.Bot{
 		ClientId:       bot.ClientId,
 		FullName:       user.FullName,
 		IdentityNumber: user.IdentityNumber,
@@ -104,7 +98,7 @@ func (c *BotController) FavoriteGet() {
 		return
 	}
 	var _resp struct {
-		Data  []favorateApp `json:"data"`
+		Data  []favoriteApp `json:"data"`
 		Error botApi.Error  `json:"error"`
 	}
 	err = json.Unmarshal(body, &_resp)
@@ -115,7 +109,7 @@ func (c *BotController) FavoriteGet() {
 	for _, app := range _resp.Data {
 		userList = append(userList, app.AppId)
 	}
-	resp := make([]*models.UserBaseResp, 0)
+	resp := make([]*models.User, 0)
 	if userList != nil {
 		resp = models.GetUserByIds(userList)
 	}
@@ -160,7 +154,7 @@ func (c *BotController) FavoriteAdd() {
 		return
 	}
 	var resp struct {
-		Data  favorateApp  `json:"data"`
+		Data  favoriteApp  `json:"data"`
 		Error botApi.Error `json:"error"`
 	}
 	err = json.Unmarshal(body, &resp)

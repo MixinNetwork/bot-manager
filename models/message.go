@@ -24,95 +24,45 @@ type MessageListener struct {
 }
 
 type Message struct {
-	ClientId       string `gorm:"column:client_id"`
-	UserId         string `gorm:"column:user_id"`
-	ConversationId string `gorm:"column:conversation_id"`
-	MessageId      string `gorm:"column:message_id"`
-	Category       string `gorm:"column:category"`
-	Data           string `gorm:"column:data"`
-	Status         string `gorm:"column:status"`
-	Source         string `gorm:"column:source"`
-	CreatedAt      string `gorm:"column:created_at"`
+	ClientId       string `gorm:"column:client_id" json:"client_id,omitempty"`
+	UserId         string `gorm:"column:user_id" json:"user_id,omitempty"`
+	ConversationId string `gorm:"column:conversation_id" json:"conversation_id,omitempty"`
+	MessageId      string `gorm:"column:message_id" json:"message_id,omitempty"`
+	IdentityNumber string `gorm:"column:identity_number" json:"identity_number,omitempty"`
+	Category       string `gorm:"column:category" json:"category,omitempty"`
+	Data           string `gorm:"column:data" json:"data,omitempty"`
+	Status         string `gorm:"column:status" json:"status,omitempty"`
+	Source         string `gorm:"column:source" json:"source,omitempty"`
+	CreatedAt      string `gorm:"column:created_at" json:"created_at,omitempty"`
 }
-type RespDbMessage struct {
-	ClientId       string `gorm:"column:client_id"`
-	UserId         string `gorm:"column:user_id"`
-	IdentityNumber string `gorm:"column:identity_number"`
-	FullName       string `gorm:"column:full_name"`
-	AvatarURL      string `gorm:"column:avatar_url"`
-	ConversationId string `gorm:"column:conversation_id"`
-	MessageId      string `gorm:"column:message_id"`
-	Category       string `gorm:"column:category"`
-	Data           string `gorm:"column:data"`
-	Status         string `gorm:"column:status"`
-	Source         string `gorm:"column:source"`
-	CreatedAt      string `gorm:"column:created_at"`
-}
-
 type RespMessage struct {
-	ClientId       string      `json:"client_id"`
-	UserId         string      `json:"user_id"`
-	RecipientId    string      `json:"recipient_id"`
-	IdentityNumber string      `json:"identity_number"`
-	FullName       string      `json:"full_name"`
-	AvatarURL      string      `json:"avatar_url"`
-	ConversationID string      `json:"conversation_id"`
-	MessageId      string      `json:"message_id"`
-	Category       string      `json:"category"`
-	Data           interface{} `json:"data"`
-	Status         string      `json:"status"`
-	Source         string      `json:"source"`
-	CreatedAt      string      `json:"created_at"`
+	Message
+
+	FullName    string `gorm:"column:full_name" json:"full_name,omitempty"`
+	AvatarURL   string `gorm:"column:avatar_url" json:"avatar_url,omitempty"`
+	RecipientId string `json:"recipient_id"`
 }
 
 type ForwardMessage struct {
-	ClientId        string `gorm:"column:client_id"`
-	MessageId       string `gorm:"column:message_id"`
-	AdminId         string `gorm:"column:admin_id"`
-	RecipientId     string `gorm:"column:recipient_id"`
-	OriginMessageId string `gorm:"column:origin_message_id"`
-	ConversationId  string `gorm:"column:conversation_id"`
-	AdminMessageId  string `gorm:"column:admin_message_id"`
-	CreatedAt       string `gorm:"column:created_at"`
+	ClientId        string `gorm:"column:client_id" json:"client_id,omitempty"`
+	MessageId       string `gorm:"column:message_id" json:"message_id,omitempty"`
+	AdminId         string `gorm:"column:admin_id" json:"admin_id,omitempty"`
+	RecipientId     string `gorm:"column:recipient_id" json:"recipient_id,omitempty"`
+	OriginMessageId string `gorm:"column:origin_message_id" json:"origin_message_id,omitempty"`
+	ConversationId  string `gorm:"column:conversation_id" json:"conversation_id,omitempty"`
+	AdminMessageId  string `gorm:"column:admin_message_id" json:"admin_message_id,omitempty"`
+	CreatedAt       string `gorm:"column:created_at" json:"created_at,omitempty"`
 }
 
-type RespForwardMessage struct {
-	ClientId        string `json:"client_id"`
-	MessageId       string `json:"message_id"`
-	AdminId         string `json:"admin_id"`
-	RecipientId     string `json:"recipient_id"`
-	OriginMessageId string `json:"origin_message_id"`
-	ConversationId  string `json:"conversation_id"`
-	AdminMessageId  string `json:"admin_message_id"`
-	CreatedAt       string `json:"created_at"`
-}
-
-type AutoReplayMessage struct {
-	ReplayId  string `gorm:"column:replay_id"`
-	ClientId  string `gorm:"column:client_id"`
-	Category  string `gorm:"column:category"`
-	Data      string `gorm:"column:data"`
-	Key       string `gorm:"column:key"`
-	CreatedAt string `gorm:"column:created_at"`
-}
-
-type RespReplayMessage struct {
-	ReplayId  string `json:"replay_id"`
-	ClientId  string `json:"client_id"`
-	Category  string `json:"category"`
-	Data      string `json:"data"`
-	Key       string `json:"key"`
-	CreatedAt string `json:"created_at"`
-}
 type ForwardMessagePropsType struct {
+	UserId           string `json:"user_id"`
+	ConversationId   string `json:"conversation_id"`
+	MessageId        string `json:"message_id"`
 	Category         string `json:"category"`
 	CreatedAt        string `json:"created_at"`
-	MessageId        string `json:"message_id"`
 	Source           string `json:"source"`
-	UserId           string `json:"user_id"`
 	QuoteMessageId   string `json:"quote_message_id"`
 	AdminId          string `json:"admin_id"`
-	ConversationId   string `json:"conversation_id"`
 	Data             string `json:"data"`
 	RepresentativeId string `json:"representative_id"`
 	Status           string `json:"status"`
@@ -160,49 +110,15 @@ func UpdateMessage(messageId, status string) {
 
 func GetAllMessagesByUserId(userId string, date string) []RespMessage {
 	clientIds := GetBotIdsByUserId(userId)
-	var messages []RespDbMessage
+	var messages []RespMessage
 	db.Conn.Table("messages").Select("users.identity_number, users.full_name, users.avatar_url, messages.*").Joins("left join users on messages.user_id=users.user_id").Where("client_id IN (?) AND messages.created_at-?>interval '0 day' ", clientIds, date).Order("created_at ASC").Find(&messages)
-	var resp []RespMessage
-	for _, message := range messages {
-		resp = append(resp, RespMessage{
-			ClientId:       message.ClientId,
-			UserId:         message.UserId,
-			IdentityNumber: message.IdentityNumber,
-			FullName:       message.FullName,
-			AvatarURL:      message.AvatarURL,
-			ConversationID: message.ConversationId,
-			MessageId:      message.MessageId,
-			Category:       message.Category,
-			Data:           message.Data,
-			Status:         message.Status,
-			Source:         message.Source,
-			CreatedAt:      message.CreatedAt,
-		})
-	}
-	return resp
+	return messages
 }
 
 func GetAllMessagesByBotId(clientId string) []RespMessage {
-	var msgs []RespDbMessage
+	var msgs []RespMessage
 	db.Conn.Table("messages").Select("users.identity_number, users.full_name, users.avatar_url, messages.*").Joins("left join users on messages.user_id=users.user_id").Where("client_id=?", clientId).Order("created_at ASC").Find(&msgs)
-	var resp []RespMessage
-	for _, msg := range msgs {
-		resp = append(resp, RespMessage{
-			ClientId:       msg.ClientId,
-			UserId:         msg.UserId,
-			IdentityNumber: msg.IdentityNumber,
-			FullName:       msg.FullName,
-			AvatarURL:      msg.AvatarURL,
-			ConversationID: msg.ConversationId,
-			MessageId:      msg.MessageId,
-			Category:       msg.Category,
-			Data:           msg.Data,
-			Status:         msg.Status,
-			Source:         msg.Source,
-			CreatedAt:      msg.CreatedAt,
-		})
-	}
-	return resp
+	return msgs
 }
 
 func GetOriginMessageById(clientId, messageId string) *ForwardMessage {
@@ -236,6 +152,6 @@ func GetLastMessageByRecipientId(clientId, recipientId string) *ForwardMessage {
 	return &msg
 }
 
-func UpdateClientMessageById(clientId string, user *UserBaseResp, msg *ForwardMessagePropsType, status string) {
+func UpdateClientMessageById(clientId string, user *User, msg *ForwardMessagePropsType, status string) {
 	db.Conn.Exec(`UPDATE messages SET user_id=$3, status=$4 WHERE client_id=$1 AND message_id=$2`, clientId, msg.MessageId, user.UserId, status)
 }

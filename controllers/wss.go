@@ -152,7 +152,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		var msg []byte
 		var messagePre *bot.MessageRequest
 		if message.Category == "PLAIN_TEXT" {
-			base64Data := base64.StdEncoding.EncodeToString([]byte(message.Data.(string)))
+			base64Data := base64.StdEncoding.EncodeToString([]byte(message.Data))
 			messagePre = &bot.MessageRequest{
 				ConversationId: bot.UniqueConversationId(message.ClientId, message.RecipientId),
 				RecipientId:    message.RecipientId,
@@ -299,19 +299,19 @@ func forwardDashboardMessage(msg *models.ForwardMessagePropsType, clientId, sess
 	// 发送给后台的管理员
 	for _, chanel := range models.HashManagerMap[hash] {
 		if chanel != nil {
-			chanel <- models.RespMessage{
-				ClientId:       clientId,
-				IdentityNumber: userInfo.IdentityNumber,
-				UserId:         userId,
-				FullName:       userInfo.FullName,
-				AvatarURL:      userInfo.AvatarURL,
-				Data:           data,
-				Category:       msg.Category,
-				CreatedAt:      msg.CreatedAt,
-				MessageId:      msg.MessageId,
-				Source:         msg.Source,
-				Status:         status,
-			}
+			var msg models.RespMessage
+			msg.ClientId = clientId
+			msg.IdentityNumber = userInfo.IdentityNumber
+			msg.UserId = userId
+			msg.FullName = userInfo.FullName
+			msg.AvatarURL = userInfo.AvatarURL
+			msg.Data = data
+			msg.Category = msg.Category
+			msg.CreatedAt = msg.CreatedAt
+			msg.MessageId = msg.MessageId
+			msg.Source = msg.Source
+			msg.Status = status
+			chanel <- msg
 		}
 	}
 	models.UpdateClientMessageById(clientId, userInfo, msg, status)

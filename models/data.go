@@ -6,21 +6,15 @@ import (
 )
 
 type DailyData struct {
-	ClientId string `gorm:"column:client_id"`
-	Date     string `gorm:"column:date"`
-	Users    int    `gorm:"column:users"`
-	Messages int    `gorm:"column:messages"`
-}
-
-type RespDailyData struct {
-	Date     string `json:"date"`
-	Users    int    `json:"users"`
-	Messages int    `json:"messages"`
+	ClientId string `gorm:"column:client_id" json:"client_id,omitempty"`
+	Date     string `gorm:"column:date" json:"date,omitempty"`
+	Users    int    `gorm:"column:users" json:"users,omitempty"`
+	Messages int    `gorm:"column:messages" json:"messages,omitempty"`
 }
 
 type RespGetData struct {
-	List  []*RespDailyData `json:"list"`
-	Today *RespDailyData   `json:"today"`
+	List  []*DailyData `json:"list"`
+	Today *DailyData   `json:"today"`
 }
 
 func init() {
@@ -50,10 +44,10 @@ type count = struct {
 func GetDailyData(clientID string) RespGetData {
 	var dailyList []DailyData
 	var resp RespGetData
-	resp.List = make([]*RespDailyData, 0)
+	resp.List = make([]*DailyData, 0)
 	db.Conn.Table("daily_data").Select("to_char(date, 'YYYY-MM-DD') as date, users, messages").Where("client_id=?", clientID).Scan(&dailyList)
 	for _, data := range dailyList {
-		resp.List = append(resp.List, &RespDailyData{
+		resp.List = append(resp.List, &DailyData{
 			Date:     data.Date,
 			Users:    data.Users,
 			Messages: data.Messages,
@@ -63,12 +57,12 @@ func GetDailyData(clientID string) RespGetData {
 	return resp
 }
 
-func GetTodayData(clientID string) *RespDailyData {
+func GetTodayData(clientID string) *DailyData {
 	var messageCount count
 	db.Conn.Raw("SELECT count(1) FROM messages WHERE client_id=? AND created_at - CURRENT_DATE > interval ' 0 day'", clientID).Scan(&messageCount)
 	var userCount count
 	db.Conn.Raw("SELECT count(1) FROM bot_users WHERE client_id=? AND created_at - CURRENT_DATE > interval ' 0 day'", clientID).Scan(&userCount)
-	return &RespDailyData{
+	return &DailyData{
 		Date:     utils.GetDate(0),
 		Users:    userCount.Count,
 		Messages: messageCount.Count,

@@ -11,28 +11,21 @@ import (
 var ChangeBotWss = make(map[string]chan string)
 
 type UserBot struct {
-	UserId     string `gorm:"column:user_id"`
-	ClientId   string `gorm:"column:client_id"`
-	SessionId  string `gorm:"column:session_id"`
-	PrivateKey string `gorm:"column:private_key"`
-	Hash       string `gorm:"column:hash"`
-}
-
-type BotInfoRes struct {
-	FullName       string `json:"full_name"`
-	IdentityNumber string `json:"identity_number"`
-	AvatarURL      string `json:"avatar_url"`
-	ClientId       string `json:"client_id"`
+	UserId     string `gorm:"column:user_id" json:"user_id,omitempty"`
+	ClientId   string `gorm:"column:client_id" json:"client_id,omitempty"`
+	SessionId  string `gorm:"column:session_id" json:"session_id,omitempty"`
+	PrivateKey string `gorm:"column:private_key" json:"private_key,omitempty"`
+	Hash       string `gorm:"column:hash" json:"hash,omitempty"`
 }
 
 type Bot struct {
-	ClientId       string `gorm:"column:client_id"`
-	SessionId      string `gorm:"column:session_id"`
-	PrivateKey     string `gorm:"column:private_key"`
-	FullName       string `gorm:"column:full_name"`
-	IdentityNumber string `gorm:"column:identity_number"`
-	AvatarURL      string `gorm:"column:avatar_url"`
-	Hash           string `gorm:"column:hash"`
+	ClientId       string `gorm:"column:client_id" json:"client_id,omitempty"`
+	SessionId      string `gorm:"column:session_id" json:"session_id,omitempty"`
+	PrivateKey     string `gorm:"column:private_key" json:"private_key,omitempty"`
+	FullName       string `gorm:"column:full_name" json:"full_name,omitempty"`
+	IdentityNumber string `gorm:"column:identity_number" json:"identity_number,omitempty"`
+	AvatarURL      string `gorm:"column:avatar_url" json:"avatar_url,omitempty"`
+	Hash           string `gorm:"column:hash" json:"hash,omitempty"`
 }
 
 func init() {
@@ -74,7 +67,7 @@ func AddOrUpdateUserBotItem(userId, clientId, sessionId, privateKey string) {
 	db.Conn.Set("gorm:insert_option", updateStr).Create(&userBot)
 }
 
-func GetBotListByUserId(userId string) []UserBase {
+func GetBotListByUserId(userId string) []User {
 	var userBotList []UserBot
 	db.Conn.Table("user_bots").Select("hash").Where("user_id=?", userId).Scan(&userBotList)
 	var hashList []string
@@ -115,19 +108,10 @@ func GetUserBotHashByUserId(userId string) []string {
 	return hashes
 }
 
-func GetUserBotByUserId(userId string) []*BotInfoRes {
+func GetUserBotByUserId(userId string) []Bot {
 	var bots []Bot
 	db.Conn.Raw("SELECT bots.client_id, bots.full_name, bots.identity_number, bots.avatar_url FROM user_bots LEFT JOIN bots ON user_bots.client_id=bots.client_id WHERE user_id=$1 AND bots.is_valid='1'", userId).Scan(&bots)
-	respBots := make([]*BotInfoRes, 0)
-	for _, bot := range bots {
-		respBots = append(respBots, &BotInfoRes{
-			FullName:       bot.FullName,
-			IdentityNumber: bot.IdentityNumber,
-			AvatarURL:      bot.AvatarURL,
-			ClientId:       bot.ClientId,
-		})
-	}
-	return respBots
+	return bots
 }
 
 func CheckUserHasBot(userId, clientId string) *Bot {
@@ -177,8 +161,8 @@ func GetBotById(clientId string) Bot {
 	return bot
 }
 
-func GetBotByHash(hashList []string) []UserBase {
-	var bot []UserBase
+func GetBotByHash(hashList []string) []User {
+	var bot []User
 	db.Conn.Table("bots").Select("full_name,identity_number,avatar_url").Where("hash IN (?)", hashList).Scan(&bot)
 	return bot
 }
