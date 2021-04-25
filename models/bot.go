@@ -4,28 +4,29 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/liuzemei/bot-manager/db"
 	"strings"
+
+	"github.com/liuzemei/bot-manager/db"
 )
 
 var ChangeBotWss = make(map[string]chan string)
 
 type UserBot struct {
-	UserId     string `gorm:"column:user_id" json:"user_id,omitempty"`
-	ClientId   string `gorm:"column:client_id" json:"client_id,omitempty"`
-	SessionId  string `gorm:"column:session_id" json:"session_id,omitempty"`
-	PrivateKey string `gorm:"column:private_key" json:"private_key,omitempty"`
-	Hash       string `gorm:"column:hash" json:"hash,omitempty"`
+	UserId     string `gorm:"column:user_id;type:varchar(36);not null" json:"user_id,omitempty"`
+	ClientId   string `gorm:"column:client_id;type:varchar(36)" json:"client_id,omitempty"`
+	SessionId  string `gorm:"column:session_id;type:varchar(36)" json:"session_id,omitempty"`
+	PrivateKey string `gorm:"column:private_key;type:varchar" json:"private_key,omitempty"`
+	Hash       string `gorm:"column:hash;type:varchar;not null" json:"hash,omitempty"`
 }
 
 type Bot struct {
-	ClientId       string `gorm:"column:client_id" json:"client_id,omitempty"`
-	SessionId      string `gorm:"column:session_id" json:"session_id,omitempty"`
-	PrivateKey     string `gorm:"column:private_key" json:"private_key,omitempty"`
-	FullName       string `gorm:"column:full_name" json:"full_name,omitempty"`
-	IdentityNumber string `gorm:"column:identity_number" json:"identity_number,omitempty"`
-	AvatarURL      string `gorm:"column:avatar_url" json:"avatar_url,omitempty"`
-	Hash           string `gorm:"column:hash" json:"hash,omitempty"`
+	ClientId       string `gorm:"column:client_id;type:varchar(36);not null;primaryKey;" json:"client_id,omitempty"`
+	SessionId      string `gorm:"column:session_id;type:varchar(36);not null;" json:"session_id,omitempty"`
+	PrivateKey     string `gorm:"column:private_key;type:varchar;not null" json:"private_key,omitempty"`
+	FullName       string `gorm:"column:full_name;type:varchar(1024);not null" json:"full_name,omitempty"`
+	IdentityNumber string `gorm:"column:identity_number;type:varchar(11);not null;unique_index:idx_identity_number" json:"identity_number,omitempty"`
+	AvatarURL      string `gorm:"column:avatar_url;type:varchar(1024);not null" json:"avatar_url,omitempty"`
+	Hash           string `gorm:"column:hash;type:varchar;not null;unique_index:idx_hash" json:"hash,omitempty"`
 }
 
 func init() {
@@ -110,7 +111,7 @@ func GetUserBotHashByUserId(userId string) []string {
 
 func GetUserBotByUserId(userId string) []Bot {
 	var bots []Bot
-	db.Conn.Raw("SELECT bots.client_id, bots.full_name, bots.identity_number, bots.avatar_url FROM user_bots LEFT JOIN bots ON user_bots.client_id=bots.client_id WHERE user_id=$1 AND bots.is_valid='1'", userId).Scan(&bots)
+	db.Conn.Raw("SELECT bots.client_id, bots.full_name, bots.identity_number, bots.avatar_url FROM user_bots LEFT JOIN bots ON user_bots.client_id=bots.client_id WHERE user_id=$1", userId).Scan(&bots)
 	return bots
 }
 
@@ -126,10 +127,6 @@ func CheckUserHasBot(userId, clientId string) *Bot {
 		return nil
 	}
 	return &bot
-}
-
-func DeleteUserBotItem(userId, clientId string) {
-	db.Conn.Delete(UserBot{}, "user_id=? AND client_id=?", userId, clientId)
 }
 
 func AddOrUpdateBotItem(clientId, sessionId, privateKey, fullName, identityNumber, avatarURL string) {
@@ -168,8 +165,8 @@ func GetBotByHash(hashList []string) []User {
 }
 
 func DeleteBotItem(clientId string) {
-	db.Conn.Table("bots").Where("client_id=?", clientId).Update("is_valid", "0")
-	db.Conn.Table("user_bots").Where("client_id=?", clientId).Update("is_valid", "0")
+	db.Conn.Delete(Bot{}, "client_id=?", clientId)
+	db.Conn.Delete(UserBot{}, "client_id=?", clientId)
 }
 
 func Sha256Hash(clientId, sessionId, privateKey string) string {

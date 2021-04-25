@@ -206,7 +206,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 		// 2. 转发给其他管理员的 messenger。
 		data := resp.Data
 		adminIds := models.GetAdminIdsByBotId(botInfo.ClientId)
-		forwardDashboardMessage(&models.ForwardMessagePropsType{
+		forwardDashboardMessage(&models.Message{
 			Category:         data.Category,
 			CreatedAt:        utils.FormatTime(data.CreatedAt),
 			MessageId:        data.MessageId,
@@ -225,7 +225,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 	return nil
 }
 
-func forwardDashboardMessage(msg *models.ForwardMessagePropsType, clientId, sessionId, privateKey, hash string, isAdmin bool, adminIds []string) {
+func forwardDashboardMessage(msg *models.Message, clientId, sessionId, privateKey, hash string, isAdmin bool, adminIds []string) {
 	if msg.UserId == "" {
 		return
 	}
@@ -299,19 +299,17 @@ func forwardDashboardMessage(msg *models.ForwardMessagePropsType, clientId, sess
 	// 发送给后台的管理员
 	for _, chanel := range models.HashManagerMap[hash] {
 		if chanel != nil {
-			var msg models.RespMessage
-			msg.ClientId = clientId
-			msg.IdentityNumber = userInfo.IdentityNumber
-			msg.UserId = userId
-			msg.FullName = userInfo.FullName
-			msg.AvatarURL = userInfo.AvatarURL
-			msg.Data = data
-			msg.Category = msg.Category
-			msg.CreatedAt = msg.CreatedAt
-			msg.MessageId = msg.MessageId
-			msg.Source = msg.Source
-			msg.Status = status
-			chanel <- msg
+			var _m models.RespMessage
+			_m.Message = *msg
+			_m.ClientId = clientId
+			_m.IdentityNumber = userInfo.IdentityNumber
+			_m.UserId = userId
+			_m.FullName = userInfo.FullName
+			_m.AvatarURL = userInfo.AvatarURL
+			_m.Data = data
+			_m.Status = status
+
+			chanel <- _m
 		}
 	}
 	models.UpdateClientMessageById(clientId, userInfo, msg, status)
@@ -335,6 +333,7 @@ func ackMessage(conn io.Writer, messageId, status, source string) {
 }
 
 func wssReadMessage(managerMessageCome chan models.RespMessage, conn io.Writer) {
+	log.Println(managerMessageCome)
 	for msg := range managerMessageCome {
 		if msg.Source == "ACKNOWLEDGE_MESSAGE_RECEIPT" {
 			ackMessage(conn, msg.MessageId, msg.Status, msg.Source)

@@ -7,12 +7,12 @@ import (
 )
 
 type AutoReplayMessage struct {
-	ReplayId  string `gorm:"column:replay_id;type:varchar(36);" json:"replay_id,omitempty"`
-	ClientId  string `gorm:"column:client_id" json:"client_id,omitempty"`
-	Category  string `gorm:"column:category" json:"category,omitempty"`
-	Data      string `gorm:"column:data" json:"data,omitempty"`
-	Key       string `gorm:"column:key" json:"key,omitempty"`
-	CreatedAt string `gorm:"column:created_at" json:"created_at,omitempty"`
+	ReplayId  string `gorm:"column:replay_id;type:varchar(36);not null;primaryKey" json:"replay_id,omitempty"`
+	ClientId  string `gorm:"column:client_id;type:varchar(36);not null" json:"client_id,omitempty"`
+	Category  string `gorm:"column:category;type:varchar(36);not null" json:"category,omitempty"`
+	Data      string `gorm:"column:data;type:text;not null" json:"data,omitempty"`
+	Key       string `gorm:"column:key;type:varchar;not null;primaryKey" json:"key,omitempty"`
+	CreatedAt string `gorm:"column:created_at;type:timestamp with time zone;not null;default now()" json:"created_at,omitempty"`
 }
 
 func init() {

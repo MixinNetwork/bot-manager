@@ -7,20 +7,20 @@ import (
 )
 
 type Broadcast struct {
-	ClientId  string `gorm:"column:client_id"`
-	UserId    string `gorm:"column:user_id"`
-	MessageId string `gorm:"column:message_id"`
-	Category  string `gorm:"column:category"`
-	Data      string `gorm:"column:data"`
-	CreatedAt string `gorm:"column:created_at"`
+	ClientId  string `gorm:"column:client_id;type:varchar(36);not null;primaryKey"`
+	UserId    string `gorm:"column:user_id;type:varchar(36);not null"`
+	MessageId string `gorm:"column:message_id;type:varchar(36);not null;primaryKey"`
+	Category  string `gorm:"column:category;type:varchar(36);not null"`
+	Data      string `gorm:"column:data;type:text;not null"`
+	CreatedAt string `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()"`
 }
 
 type BroadcastTmp struct {
-	ClientId        string `gorm:"column:client_id"`
-	MessageId       string `gorm:"column:message_id"`
-	OriginMessageId string `gorm:"column:origin_message_id"`
-	UserId          string `gorm:"column:user_id"`
-	ConversationId  string `gorm:"column:conversation_id"`
+	ClientId        string `gorm:"column:client_id;type:varchar(36);not null"`
+	MessageId       string `gorm:"column:message_id;type:varchar(36);not null"`
+	OriginMessageId string `gorm:"column:origin_message_id;type:varchar(36);not null;index"`
+	UserId          string `gorm:"column:user_id;type:varchar(36);not null"`
+	ConversationId  string `gorm:"column:conversation_id;type:varchar(36);not null"`
 }
 
 func init() {

@@ -24,63 +24,42 @@ type MessageListener struct {
 }
 
 type Message struct {
-	ClientId       string `gorm:"column:client_id" json:"client_id,omitempty"`
-	UserId         string `gorm:"column:user_id" json:"user_id,omitempty"`
-	ConversationId string `gorm:"column:conversation_id" json:"conversation_id,omitempty"`
-	MessageId      string `gorm:"column:message_id" json:"message_id,omitempty"`
-	IdentityNumber string `gorm:"column:identity_number" json:"identity_number,omitempty"`
-	Category       string `gorm:"column:category" json:"category,omitempty"`
-	Data           string `gorm:"column:data" json:"data,omitempty"`
-	Status         string `gorm:"column:status" json:"status,omitempty"`
-	Source         string `gorm:"column:source" json:"source,omitempty"`
-	CreatedAt      string `gorm:"column:created_at" json:"created_at,omitempty"`
+	ClientId       string `gorm:"column:client_id;type:varchar(36);not null;primaryKey" json:"client_id,omitempty"`
+	UserId         string `gorm:"column:user_id;type:varchar(36);not null" json:"user_id,omitempty"`
+	ConversationId string `gorm:"column:conversation_id;type:varchar(36);not null" json:"conversation_id,omitempty"`
+	MessageId      string `gorm:"column:message_id;type:varchar(36);not null;primaryKey" json:"message_id,omitempty"`
+	Category       string `gorm:"column:category;type:varchar(36)" json:"category,omitempty"`
+	Data           string `gorm:"column:data;type:text" json:"data,omitempty"`
+	Status         string `gorm:"column:status;type:varchar(36);not null;" json:"status,omitempty"`
+	Source         string `gorm:"column:source;type:varchar(36);not null;" json:"source,omitempty"`
+	CreatedAt      string `gorm:"column:created_at;type:timestamp with time zone;not null;default now();" json:"created_at,omitempty"`
+
+	IdentityNumber   string `json:"identity_number,omitempty"`
+	QuoteMessageId   string `json:"quote_message_id,omitempty"`
+	AdminId          string `json:"admin_id,omitempty"`
+	RepresentativeId string `json:"representative_id,omitempty"`
+	UpdatedAt        string `json:"updated_at,omitempty"`
 }
 type RespMessage struct {
 	Message
 
-	FullName    string `gorm:"column:full_name" json:"full_name,omitempty"`
-	AvatarURL   string `gorm:"column:avatar_url" json:"avatar_url,omitempty"`
+	FullName    string `json:"full_name,omitempty"`
+	AvatarURL   string `json:"avatar_url,omitempty"`
 	RecipientId string `json:"recipient_id"`
 }
 
 type ForwardMessage struct {
-	ClientId        string `gorm:"column:client_id" json:"client_id,omitempty"`
-	MessageId       string `gorm:"column:message_id" json:"message_id,omitempty"`
-	AdminId         string `gorm:"column:admin_id" json:"admin_id,omitempty"`
-	RecipientId     string `gorm:"column:recipient_id" json:"recipient_id,omitempty"`
-	OriginMessageId string `gorm:"column:origin_message_id" json:"origin_message_id,omitempty"`
-	ConversationId  string `gorm:"column:conversation_id" json:"conversation_id,omitempty"`
-	AdminMessageId  string `gorm:"column:admin_message_id" json:"admin_message_id,omitempty"`
-	CreatedAt       string `gorm:"column:created_at" json:"created_at,omitempty"`
-}
-
-type ForwardMessagePropsType struct {
-	UserId           string `json:"user_id"`
-	ConversationId   string `json:"conversation_id"`
-	MessageId        string `json:"message_id"`
-	Category         string `json:"category"`
-	CreatedAt        string `json:"created_at"`
-	Source           string `json:"source"`
-	QuoteMessageId   string `json:"quote_message_id"`
-	AdminId          string `json:"admin_id"`
-	Data             string `json:"data"`
-	RepresentativeId string `json:"representative_id"`
-	Status           string `json:"status"`
-	UpdatedAt        string `json:"updated_at"`
+	ClientId        string `gorm:"column:client_id;type:varchar(36);not null;primaryKey" json:"client_id,omitempty"`
+	MessageId       string `gorm:"column:message_id;type:varchar(36);not null;primaryKey" json:"message_id,omitempty"`
+	AdminId         string `gorm:"column:admin_id;type:varchar(36);not null" json:"admin_id,omitempty"`
+	RecipientId     string `gorm:"column:recipient_id;type:varchar(36);not null" json:"recipient_id,omitempty"`
+	OriginMessageId string `gorm:"column:origin_message_id;type:varchar(36);not null" json:"origin_message_id,omitempty"`
+	ConversationId  string `gorm:"column:conversation_id;type:varchar(36);not null" json:"conversation_id,omitempty"`
+	AdminMessageId  string `gorm:"column:admin_message_id;type:varchar(36);not null" json:"admin_message_id,omitempty"`
+	CreatedAt       string `gorm:"column:created_at;type:varchar(36);not null" json:"created_at,omitempty"`
 }
 
 func init() {
-	db.RegisterMigration(`CREATE TABLE IF NOT EXISTS forward_messages (
-  client_id              VARCHAR(36) NOT NULL,
-  message_id             VARCHAR(36) NOT NULL,
-  admin_id               VARCHAR(36) NOT NULL,
-  recipient_id           VARCHAR(36) NOT NULL,
-  origin_message_id      VARCHAR(36) NOT NULL,
-  conversation_id        VARCHAR(36) NOT NULL,
-  admin_message_id       VARCHAR(36),
-  created_at             TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  PRIMARY KEY(client_id, message_id)
-);`)
 	db.RegisterMigration(`CREATE TABLE IF NOT EXISTS messages (
   client_id           VARCHAR(36) NOT NULL,
   user_id             VARCHAR(36) NOT NULL,
@@ -91,6 +70,17 @@ func init() {
   status              VARCHAR(36) NOT NULL,
   source              VARCHAR(36) NOT NULL,
   created_at          TIMESTAMP WITH TIME ZONE NOT NULL,
+  PRIMARY KEY(client_id, message_id)
+);`)
+	db.RegisterMigration(`CREATE TABLE IF NOT EXISTS forward_messages (
+  client_id              VARCHAR(36) NOT NULL,
+  message_id             VARCHAR(36) NOT NULL,
+  admin_id               VARCHAR(36) NOT NULL,
+  recipient_id           VARCHAR(36) NOT NULL,
+  origin_message_id      VARCHAR(36) NOT NULL,
+  conversation_id        VARCHAR(36) NOT NULL,
+  admin_message_id       VARCHAR(36),
+  created_at             TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   PRIMARY KEY(client_id, message_id)
 );`)
 	db.RegisterModel(&Message{})
@@ -152,6 +142,6 @@ func GetLastMessageByRecipientId(clientId, recipientId string) *ForwardMessage {
 	return &msg
 }
 
-func UpdateClientMessageById(clientId string, user *User, msg *ForwardMessagePropsType, status string) {
+func UpdateClientMessageById(clientId string, user *User, msg *Message, status string) {
 	db.Conn.Exec(`UPDATE messages SET user_id=$3, status=$4 WHERE client_id=$1 AND message_id=$2`, clientId, msg.MessageId, user.UserId, status)
 }

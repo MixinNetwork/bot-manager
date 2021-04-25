@@ -8,20 +8,20 @@ import (
 )
 
 type User struct {
-	UserId         string `gorm:"column:user_id" json:"user_id,omitempty"`
-	FullName       string `gorm:"column:full_name" json:"full_name,omitempty"`
-	IdentityNumber string `gorm:"column:identity_number" json:"identity_number,omitempty"`
-	AvatarURL      string `gorm:"column:avatar_url" json:"avatar_url,omitempty"`
-	AccessToken    string `gorm:"column:access_token" json:"access_token,omitempty"`
-	CreatedAt      string `gorm:"column:created_at" json:"created_at,omitempty"`
+	UserId         string `gorm:"column:user_id;type:varchar(36);not null;primaryKey" json:"user_id,omitempty"`
+	FullName       string `gorm:"column:full_name;type:varchar(1024);not null" json:"full_name,omitempty"`
+	IdentityNumber string `gorm:"column:identity_number;type:varchar(11);not null" json:"identity_number,omitempty"`
+	AvatarURL      string `gorm:"column:avatar_url;type:varchar(1024);not null" json:"avatar_url,omitempty"`
+	AccessToken    string `gorm:"column:access_token;type:varchar(512);not null" json:"access_token,omitempty"`
+	CreatedAt      string `gorm:"column:created_at;type:timestamp with time zone;not null; default now()" json:"created_at,omitempty"`
 }
 
 type BotUser struct {
-	ClientId  string `gorm:"column:client_id"`
-	UserId    string `gorm:"column:user_id"`
-	Status    string `gorm:"column:status"`
-	BlockTime string `gorm:"column:block_time"`
-	CreatedAt string `gorm:"column:created_at"`
+	UserId    string `gorm:"column:user_id;type:varchar(36);not null;primaryKey"`
+	ClientId  string `gorm:"column:client_id;type:varchar(36);not null;primaryKey"`
+	Status    string `gorm:"column:status;type:varchar(36);not null"`
+	BlockTime string `gorm:"column:block_time;type:varchar(36);not null"`
+	CreatedAt string `gorm:"column:created_at;type:varchar(36);not null"`
 }
 
 func init() {

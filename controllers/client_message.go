@@ -79,7 +79,7 @@ func handleAutoReplayMessage(msg models.MessengerChannel, hash string, adminIds 
 	decodeString := strings.ToLower(string(decodeBytes))
 	replayData, replayCategory := models.GetAutoReplayMessageByKey(msg.ClientID, decodeString)
 	if replayData != "" {
-		forwardDashboardMessage(&models.ForwardMessagePropsType{
+		forwardDashboardMessage(&models.Message{
 			Category:         _msg.Category,
 			CreatedAt:        utils.FormatTime(_msg.CreatedAt),
 			MessageId:        _msg.MessageId,
@@ -107,7 +107,7 @@ func handleAutoReplayMessage(msg models.MessengerChannel, hash string, adminIds 
 			log.Println("转发自动回复的消息出问题了。", err)
 			return true
 		}
-		forwardDashboardMessage(&models.ForwardMessagePropsType{
+		forwardDashboardMessage(&models.Message{
 			Category:       replayCategory,
 			CreatedAt:      utils.FormatTime(_msg.CreatedAt),
 			MessageId:      messageId,
@@ -124,7 +124,7 @@ func handleAutoReplayMessage(msg models.MessengerChannel, hash string, adminIds 
 // 转发给管理后台
 func forwardLoginDashboardAdmins(msg models.MessengerChannel, hash string, isManager bool, adminIds []string) {
 	_msg := &msg.Message
-	forwardDashboardMessage(&models.ForwardMessagePropsType{
+	forwardDashboardMessage(&models.Message{
 		Category:         _msg.Category,
 		CreatedAt:        utils.FormatTime(_msg.CreatedAt),
 		MessageId:        _msg.MessageId,
@@ -255,6 +255,7 @@ var notHandleMessage = map[string]bool{
 	"MESSAGE_RECALL": true,
 }
 
+// 处理非管理员消息
 func handleNonAdminClientMessage(msg models.MessengerChannel, adminIds []string) {
 	_msg := &msg.Message
 	if notHandleMessage[_msg.Category] {

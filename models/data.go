@@ -6,10 +6,10 @@ import (
 )
 
 type DailyData struct {
-	ClientId string `gorm:"column:client_id" json:"client_id,omitempty"`
-	Date     string `gorm:"column:date" json:"date,omitempty"`
-	Users    int    `gorm:"column:users" json:"users,omitempty"`
-	Messages int    `gorm:"column:messages" json:"messages,omitempty"`
+	ClientId string `gorm:"column:client_id;type:varchar(36);not null;primaryKey" json:"client_id"`
+	Date     string `gorm:"column:date;type:date;not null;primaryKey" json:"date"`
+	Users    int    `gorm:"column:users;type:integer;not null;default 0" json:"users"`
+	Messages int    `gorm:"column:messages;type:integer;not null;default 0" json:"messages"`
 }
 
 type RespGetData struct {
