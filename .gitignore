@@ -16,3 +16,4 @@ log
 .env
 .env.production
 .env.development
+/doc/*
