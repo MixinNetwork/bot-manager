@@ -67,9 +67,15 @@ go build
 
 ### 2. 客户端部署
 
-#### 1. 环境变量的路径
+#### 1. 复制配置文件为指定文件名
 > 1. 开发环境： `/client/.env` 和 `/client/.env.development`
+```shell script
+cp /client/.env.default /client/.env.development
+```
 > 2. 生产环境： `/client/.env.production`
+```shell script
+cp /client/.env.default /client/.env.development
+```
 
 #### 2. 环境变量的配置
 

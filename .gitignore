@@ -12,4 +12,7 @@ dist
 .idea
 app.conf
 scripts
+log
+.env
 .env.production
+.env.development
