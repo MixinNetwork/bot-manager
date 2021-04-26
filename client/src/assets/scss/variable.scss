@@ -1,0 +1,10 @@
+$adaptWidth: "420px";
+
+@mixin main-container {
+  flex: 1;
+  background-color: #fff;
+  overflow: auto;
+  box-shadow: 0 8px 20px rgba(0, 18, 179, 0.1);
+  margin: 0 20px 20px 20px;
+  border-radius: 0 0 8px 8px;
+}
