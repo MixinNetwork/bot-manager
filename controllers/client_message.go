@@ -3,12 +3,13 @@ package controllers
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/MixinNetwork/bot-api-go-client"
-	"github.com/liuzemei/bot-manager/externals"
-	"github.com/liuzemei/bot-manager/models"
-	"github.com/liuzemei/bot-manager/utils"
 	"log"
 	"strings"
+
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-manager/externals"
+	"github.com/MixinNetwork/bot-manager/models"
+	"github.com/MixinNetwork/bot-manager/utils"
 )
 
 // 客户端消息入口

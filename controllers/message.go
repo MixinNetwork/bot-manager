@@ -4,13 +4,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/MixinNetwork/bot-api-go-client"
-	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/externals"
-	"github.com/liuzemei/bot-manager/models"
-	"github.com/liuzemei/bot-manager/session"
 	"log"
 	"path"
+
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-manager/externals"
+	"github.com/MixinNetwork/bot-manager/models"
+	"github.com/MixinNetwork/bot-manager/session"
+	"github.com/astaxie/beego"
 )
 
 type MessageController struct {

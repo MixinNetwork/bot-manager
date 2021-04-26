@@ -8,8 +8,8 @@
 package routers
 
 import (
+	"github.com/MixinNetwork/bot-manager/controllers"
 	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/controllers"
 )
 
 func init() {

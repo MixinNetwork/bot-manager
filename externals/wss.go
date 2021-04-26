@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-manager/durable"
+	"github.com/MixinNetwork/bot-manager/models"
+	"github.com/MixinNetwork/bot-manager/utils"
 	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/durable"
-	"github.com/liuzemei/bot-manager/models"
-	"github.com/liuzemei/bot-manager/utils"
 )
 
 type listener struct {

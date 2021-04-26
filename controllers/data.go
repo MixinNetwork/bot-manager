@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"github.com/MixinNetwork/bot-manager/models"
 	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/models"
 )
 
 type DataController struct {

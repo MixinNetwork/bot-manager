@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/liuzemei/bot-manager/db"
-	"github.com/liuzemei/bot-manager/utils"
+	"github.com/MixinNetwork/bot-manager/db"
+	"github.com/MixinNetwork/bot-manager/utils"
 )
 
 type DailyData struct {

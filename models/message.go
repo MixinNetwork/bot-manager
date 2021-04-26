@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/MixinNetwork/bot-api-go-client"
-	"github.com/liuzemei/bot-manager/db"
+	"github.com/MixinNetwork/bot-manager/db"
 )
 
 type MessengerChannel struct {

@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-manager/durable"
+	"github.com/MixinNetwork/bot-manager/session"
 	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/durable"
-	"github.com/liuzemei/bot-manager/session"
 )
 
 var (

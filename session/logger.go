@@ -2,7 +2,7 @@ package session
 
 import (
 	"context"
-	"github.com/liuzemei/bot-manager/durable"
+	"github.com/MixinNetwork/bot-manager/durable"
 )
 
 type contextValueKey int

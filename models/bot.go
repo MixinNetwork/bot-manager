@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/liuzemei/bot-manager/db"
+	"github.com/MixinNetwork/bot-manager/db"
 )
 
 var ChangeBotWss = make(map[string]chan string)

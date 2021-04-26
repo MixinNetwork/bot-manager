@@ -2,9 +2,10 @@ package models
 
 import (
 	"fmt"
-	"github.com/liuzemei/bot-manager/db"
-	"github.com/liuzemei/bot-manager/utils"
 	"time"
+
+	"github.com/MixinNetwork/bot-manager/db"
+	"github.com/MixinNetwork/bot-manager/utils"
 )
 
 type User struct {

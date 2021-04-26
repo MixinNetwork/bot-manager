@@ -9,14 +9,14 @@ import (
 	"strings"
 
 	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-manager/durable"
+	"github.com/MixinNetwork/bot-manager/externals"
+	"github.com/MixinNetwork/bot-manager/middleware"
+	"github.com/MixinNetwork/bot-manager/models"
+	"github.com/MixinNetwork/bot-manager/session"
+	"github.com/MixinNetwork/bot-manager/utils"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"github.com/liuzemei/bot-manager/durable"
-	"github.com/liuzemei/bot-manager/externals"
-	"github.com/liuzemei/bot-manager/middleware"
-	"github.com/liuzemei/bot-manager/models"
-	"github.com/liuzemei/bot-manager/session"
-	"github.com/liuzemei/bot-manager/utils"
 )
 
 func connectBot(botInfo models.UserBot) {

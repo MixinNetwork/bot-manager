@@ -2,12 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/astaxie/beego"
-	"github.com/liuzemei/bot-manager/externals"
-	"github.com/liuzemei/bot-manager/middleware"
-	"github.com/liuzemei/bot-manager/models"
-	"github.com/liuzemei/bot-manager/session"
 	"log"
+
+	"github.com/MixinNetwork/bot-manager/externals"
+	"github.com/MixinNetwork/bot-manager/middleware"
+	"github.com/MixinNetwork/bot-manager/models"
+	"github.com/MixinNetwork/bot-manager/session"
+	"github.com/astaxie/beego"
 )
 
 // Operations about Users

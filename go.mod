@@ -1,4 +1,4 @@
-module github.com/liuzemei/bot-manager
+module github.com/MixinNetwork/bot-manager
 
 go 1.15
 

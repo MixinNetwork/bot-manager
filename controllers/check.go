@@ -1,9 +1,9 @@
 package controllers
 
 import (
+	"github.com/MixinNetwork/bot-manager/models"
+	"github.com/MixinNetwork/bot-manager/session"
 	"github.com/astaxie/beego/context"
-	"github.com/liuzemei/bot-manager/models"
-	"github.com/liuzemei/bot-manager/session"
 )
 
 func checkBotManager(userId, clientId string, ctx *context.Context) bool {

@@ -1,12 +1,13 @@
 package middleware
 
 import (
+	"regexp"
+	"strings"
+
+	"github.com/MixinNetwork/bot-manager/session"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/liuzemei/bot-manager/session"
-	"regexp"
-	"strings"
 )
 
 var whitelist = [][2]string{

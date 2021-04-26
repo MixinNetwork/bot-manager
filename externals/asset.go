@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/MixinNetwork/bot-api-go-client"
-	"github.com/liuzemei/bot-manager/session"
+	"github.com/MixinNetwork/bot-manager/session"
 )
 
 func AssetList(ctx context.Context, token string) ([]*bot.Asset, error) {
