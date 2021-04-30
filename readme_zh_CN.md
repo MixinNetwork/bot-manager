@@ -1,3 +1,23 @@
+### 项目介绍
+这是一个比较方便的机器人消息管理以及用户管理的后台系统。您可以比较方便的处理其他人向机器人发送的消息。
+
+现已支持如下功能：
+> 1. 后台直接回复用户消息。
+> 2. 管理员通过 Messenger 客户端通过回复消息的方式，直接回复给用户。
+> 3. 拒绝接收指定用户的信息。
+> 4. 通过机器人发送公告以及公告的撤回
+> 5. 指定关键字自动回复(被加好友自动回复)
+> 6. 多管理员对同一机器人的支持(数据同步)
+> 7. 统计机器人每日的新增用户、新增留言次数以及总用户数、总留言次数。
+> 8. 设置关联分享的应用。
+
+以下为应用内的部分截图。
+![image](https://github.com/MixinNetwork/bot-manager/blob/main/img/data.png)
+![image](https://github.com/MixinNetwork/bot-manager/blob/main/img/user.png)
+![image](https://github.com/MixinNetwork/bot-manager/blob/main/img/message.png)
+![image](https://github.com/MixinNetwork/bot-manager/blob/main/img/setting.png)
+
+
 
 ### 1. 服务端部署
 
