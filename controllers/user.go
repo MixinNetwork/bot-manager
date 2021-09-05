@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/MixinNetwork/bot-manager/externals"
 	"github.com/MixinNetwork/bot-manager/middleware"
@@ -105,7 +106,9 @@ func GetMessageUserAutoUpdate(userId, clientId string) (*models.User, error) {
 		if usersUser.IdentityNumber == "" {
 			userInfo, err := externals.GetUserById(userId)
 			if err != nil {
-				log.Println("获取userInfo出错了", err)
+				if strings.Contains(err.Error(), "Server Error") {
+					return GetMessageUserAutoUpdate(userId, clientId)
+				}
 				return nil, err
 			}
 			modelUser := models.User{

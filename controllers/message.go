@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"time"
 
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/MixinNetwork/bot-manager/externals"
@@ -186,6 +187,8 @@ func ConnectAllBot() {
 	for _, userBot := range bots {
 		go connectBot(userBot)
 	}
+	time.Sleep(time.Second)
+	go connectWss()
 }
 
 type ImageMessagePayload struct {

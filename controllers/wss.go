@@ -37,76 +37,74 @@ func connectBot(botInfo models.UserBot) {
 	}
 }
 
-func init() {
-	go func() {
-		http.ListenAndServe(":9099", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			conn, _, _, err := ws.UpgradeHTTP(r, w)
-			if !strings.HasPrefix(r.URL.RawQuery, "token=") {
-				errMessage := session.AuthorizationError()
-				resp, err := json.Marshal(errMessage)
-				if err != nil {
-					log.Println("ListenAndServe", err)
-				}
-				w.Write(resp)
-				return
+func connectWss() {
+	http.ListenAndServe(":9099", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		conn, _, _, err := ws.UpgradeHTTP(r, w)
+		if !strings.HasPrefix(r.URL.RawQuery, "token=") {
+			errMessage := session.AuthorizationError()
+			resp, err := json.Marshal(errMessage)
+			if err != nil {
+				log.Println("ListenAndServe", err)
 			}
-			userId, err := middleware.Parse(r.URL.RawQuery[6:])
-			if err != nil || userId == "" {
-				// handle error
-				return
-			}
-			hashes := models.GetUserBotHashByUserId(userId)
-			if len(hashes) == 0 {
-				return
-			}
-			for _, hash := range hashes {
-				var messageTransfer = make(chan models.RespMessage)
-				models.HashManagerMap[hash][userId] = messageTransfer
-				go wssReadMessage(messageTransfer, conn)
-			}
-			if models.ChangeBotWss[userId] == nil {
-				changeBotChannel := make(chan string, 1)
-				models.ChangeBotWss[userId] = changeBotChannel
-			}
-			go changeWssConnect(models.ChangeBotWss[userId], conn, userId)
-			go func() {
-				defer conn.Close()
-				defer func() {
-					if r := recover(); r != nil {
-						log.Println("/controllers/wss go func error", r)
-					}
-				}()
-				for {
-					msg, op, err := wsutil.ReadClientData(conn)
-					if op != 1 || err != nil {
-						for hash, hashMap := range models.HashManagerMap {
-							for _userId, channel := range hashMap {
-								if _userId == userId && channel != nil {
-									close(models.HashManagerMap[hash][userId])
-									delete(models.HashManagerMap[hash], userId)
-								}
-							}
-						}
-						if models.ChangeBotWss[userId] != nil {
-							close(models.ChangeBotWss[userId])
-							delete(models.ChangeBotWss, userId)
-						}
-						return
-					}
-					if string(msg) == "ping" {
-						if err := writeMessage(conn, []byte("pong")); err != nil {
-							log.Println("/controllers/wss writeMessage", err)
-						}
-					} else {
-						err := handleUserMessage(conn, msg, userId)
-						if err != nil {
-							log.Println("处理消息错误", err)
-						}
-					}
+			w.Write(resp)
+			return
+		}
+		userId, err := middleware.Parse(r.URL.RawQuery[6:])
+		if err != nil || userId == "" {
+			// handle error
+			return
+		}
+		hashes := models.GetUserBotHashByUserId(userId)
+		if len(hashes) == 0 {
+			return
+		}
+		for _, hash := range hashes {
+			var messageTransfer = make(chan models.RespMessage)
+			models.HashManagerMap[hash][userId] = messageTransfer
+			go wssReadMessage(messageTransfer, conn)
+		}
+		if models.ChangeBotWss[userId] == nil {
+			changeBotChannel := make(chan string, 1)
+			models.ChangeBotWss[userId] = changeBotChannel
+		}
+		go changeWssConnect(models.ChangeBotWss[userId], conn, userId)
+		go func() {
+			defer conn.Close()
+			defer func() {
+				if r := recover(); r != nil {
+					log.Println("/controllers/wss go func error", r)
 				}
 			}()
-		}))
-	}()
+			for {
+				msg, op, err := wsutil.ReadClientData(conn)
+				if op != 1 || err != nil {
+					for hash, hashMap := range models.HashManagerMap {
+						for _userId, channel := range hashMap {
+							if _userId == userId && channel != nil {
+								close(models.HashManagerMap[hash][userId])
+								delete(models.HashManagerMap[hash], userId)
+							}
+						}
+					}
+					if models.ChangeBotWss[userId] != nil {
+						close(models.ChangeBotWss[userId])
+						delete(models.ChangeBotWss, userId)
+					}
+					return
+				}
+				if string(msg) == "ping" {
+					if err := writeMessage(conn, []byte("pong")); err != nil {
+						log.Println("/controllers/wss writeMessage", err)
+					}
+				} else {
+					err := handleUserMessage(conn, msg, userId)
+					if err != nil {
+						log.Println("处理消息错误", err)
+					}
+				}
+			}
+		}()
+	}))
 }
 
 func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
