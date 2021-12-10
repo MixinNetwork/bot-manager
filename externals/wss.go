@@ -87,7 +87,7 @@ func StartWebSockets(clientId, sessionId, privateKey, hash string) error {
 }
 
 func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, privateKey string) error {
-	if len(messages) <= 100 {
+	if len(messages) <= 80 {
 		err := bot.PostMessages(durable.Ctx, messages, clientId, sessionId, privateKey)
 		if err != nil {
 			return err
@@ -95,13 +95,13 @@ func SendBatchMessage(messages []*bot.MessageRequest, clientId, sessionId, priva
 	} else {
 		overMessage := messages
 		for {
-			if len(overMessage) > 100 {
-				err := bot.PostMessages(durable.Ctx, overMessage[:100], clientId, sessionId, privateKey)
+			if len(overMessage) > 80 {
+				err := bot.PostMessages(durable.Ctx, overMessage[:80], clientId, sessionId, privateKey)
 				if err != nil {
 					log.Println("SendBatchMessage", err)
 					continue
 				}
-				overMessage = overMessage[100:]
+				overMessage = overMessage[80:]
 			} else {
 				err := bot.PostMessages(durable.Ctx, overMessage, clientId, sessionId, privateKey)
 				if err != nil {

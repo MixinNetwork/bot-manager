@@ -13,7 +13,7 @@
       </span>
     </div>
     <div class="edit-main">
-      <textarea class="send-text" v-if="activeType==='PLAIN_TEXT'" placeholder="在此输入公告内容" v-model="content"></textarea>
+      <textarea class="send-text" v-if="['PLAIN_TEXT','PLAIN_POST'].includes(activeType)" placeholder="在此输入公告内容" v-model="content"></textarea>
       <div class="send-image" v-if="activeType==='PLAIN_IMAGE'">
         <input type="file" @change="getFile" />
         <span>点击选择图片</span>

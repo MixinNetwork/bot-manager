@@ -225,7 +225,7 @@ func sendBroadcast(clientBot *models.Bot, category, data string, isBase64Data bo
 	if isBase64Data {
 		base64Data = data
 	} else {
-		if category == "PLAIN_TEXT" {
+		if category == "PLAIN_TEXT" || category == "PLAIN_POST" {
 			base64Data = base64.StdEncoding.EncodeToString([]byte(data))
 		} else if category == "PLAIN_IMAGE" {
 			_msgData, err := json.Marshal(data)

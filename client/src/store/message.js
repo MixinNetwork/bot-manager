@@ -15,7 +15,7 @@ export default {
       key: "关键字回复",
       add: "被加好友回复"
     },
-    messageTypeMap: { PLAIN_TEXT: '文字消息', PLAIN_IMAGE: '图片', BUTTON_GROUP: "按钮" },
+    messageTypeMap: { PLAIN_TEXT: '文字消息', PLAIN_POST: '文章消息', PLAIN_IMAGE: '图片', BUTTON_GROUP: "按钮" },
     activeType: 'PLAIN_TEXT',
     activeContent: '',
 
