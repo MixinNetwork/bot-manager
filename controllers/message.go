@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-manager/durable"
 	"github.com/MixinNetwork/bot-manager/externals"
 	"github.com/MixinNetwork/bot-manager/models"
 	"github.com/MixinNetwork/bot-manager/session"
@@ -57,6 +58,22 @@ func (c *MessageController) GetMessageReplay() {
 	}
 	data := models.GetAutoReplayMessage(clientId)
 	c.Data["json"] = Resp{Data: data}
+	c.ServeJSON()
+}
+
+func (c *MessageController) GetMessageViewURL() {
+	clientId := c.GetString("client_id")
+	attachmentId := c.GetString("attachment_id")
+	userId := c.Ctx.Input.GetData("UserId")
+	if !checkBotManager(userId.(string), clientId, c.Ctx) {
+		return
+	}
+	botInfo := models.GetBotById(clientId)
+	att, err := bot.AttachmentShow(durable.Ctx, clientId, botInfo.SessionId, botInfo.PrivateKey, attachmentId)
+	if err != nil {
+		return
+	}
+	c.Data["json"] = Resp{Data: att.ViewURL}
 	c.ServeJSON()
 }
 

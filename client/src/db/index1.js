@@ -78,6 +78,15 @@ class DB {
     return resolveData(req)
   }
 
+  async updateMessageData(message_id, data) {
+    let message = await this.getMessage(message_id)
+    if (!message) return
+    message.data = data
+    let store = await this.getTx()
+    let req = store.put(message)
+    return resolveData(req)
+  }
+
   async getTx() {
     while (!this.db) {
       await wait()

@@ -22,15 +22,35 @@
   import { createNamespacedHelpers } from 'vuex'
   import MessageReply from "./MessageReply"
   import Avatar from "../../../components/Avatar"
+  import api from '../../../api'
+  import db from '../../../db/index1'
 
   const { mapState } = createNamespacedHelpers('message')
+  const { mapState: userMapState } = createNamespacedHelpers('user')
   export default {
     components: { Avatar, MessageReply },
     computed: {
-      ...mapState(['contactList', 'replyModal'])
+      ...mapState(['contactList', 'replyModal']),
+      ...userMapState(['active_bot']),
     },
     methods: {
-      clickSession(activeContact) {
+      async clickSession(activeContact) {
+        console.log(activeContact)
+        const { messages } = activeContact
+        let imgLoader = []
+        for (const message of messages) {
+          imgLoader.push((async () => {
+            if (message.category === 'PLAIN_IMAGE') {
+              if(!message.data.startsWith('http')) {
+                const { attachment_id } = JSON.parse(message.data)
+                const url = await api.getImgUrl(this.active_bot.client_id, attachment_id)
+                message.data = url
+                await db.updateMessageData(message.message_id, url)
+              }
+            }
+          })())
+        }
+        await Promise.all(imgLoader)
         this.$DC('message', { replyModal: true, activeContact })
       }
     },

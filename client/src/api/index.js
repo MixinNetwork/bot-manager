@@ -24,6 +24,10 @@ class APIS {
     return request.post('/message/uploadFile', formData, { heaaders: { 'Content-Type': 'multipart/form-data' } })
   }
 
+  getImgUrl(client_id, attachment_id) {
+    return request.get('/message/getViewURL', { params: { client_id, attachment_id } })
+  }
+  
   sendSpecificUser(data, group) {
     return request.post('/sendSpecificUser', { data, group })
   }
