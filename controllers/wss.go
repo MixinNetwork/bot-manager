@@ -159,8 +159,7 @@ func handleUserMessage(conn io.Writer, msg []byte, userId string) error {
 				Data:           base64Data,
 			}
 		} else if message.Category == "PLAIN_IMAGE" {
-			_msgData, err := json.Marshal(message.Data)
-			base64Data := base64.StdEncoding.EncodeToString(_msgData)
+			base64Data := base64.StdEncoding.EncodeToString([]byte(message.Data))
 			if err != nil {
 				return err
 			}

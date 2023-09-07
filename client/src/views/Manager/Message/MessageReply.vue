@@ -122,7 +122,7 @@
         let { clientHeight: height, clientWidth: width } = this.$refs.imgFile
         let { size, type: mime_type } = file
         let { attachment_id } = await this.APIS.uploadFile(file)
-        let data = { height, width, size, mime_type, attachment_id }
+        let data = JSON.stringify({ height, width, size, mime_type, attachment_id })
         this.sendMessage({ data, category: 'PLAIN_IMAGE' })
         this._file = this.file = null
       },
@@ -331,7 +331,7 @@
       font-size: 20px;
     }
 
-    input {
+    & > input {
       flex: 1;
       margin: 0 28px;
     }
