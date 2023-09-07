@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js'
 const AvatarColors = ['#FFD659', '#FFC168', '#F58268', '#F4979C', '#EC7F87', '#FF78CB', '#C377E0', '#8BAAFF', '#78DCFA', '#88E5B9', '#BFF199', '#C5E1A5', '#CD907D', '#BE938E', '#B68F91', '#BC987B', '#A69E8E', '#D4C99E', '#93C2E6', '#92C3D9', '#8FBFC5', '#80CBC4', '#A4DBDB', '#B2C8BD', '#F7C8C9', '#DCC6E4', '#BABAE8', '#BABCD5', '#AD98DA', '#C097D9']
 
 export function getAvatarColorById(id) {
+  if(!id || typeof id !== 'string') return AvatarColors[0]
   let result = typeof BigInt === 'function' ? uuidHashCode(id) : ios(id)
   return AvatarColors[result % AvatarColors.length]
 }
